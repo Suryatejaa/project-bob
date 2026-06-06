@@ -1,0 +1,406 @@
+{
+  "meta": {
+    "name": "Babu Lake Babu",
+    "full_name": "MAHESH BABU",
+    "birthday": "August 9, 1975",
+    "tribute_year": "2026",
+    "birthday_age": 51,
+    "birthplace": "Chennai, Tamil Nadu",
+    "hero_quote": "Some entries are not watched. They hit like a storm.",
+    "opening_title": "JAI BABU",
+    "hero_image": "./assets/images/desktop-hero.jpeg",
+    "hero_image_mobile": "./assets/images/mobile-hero.jpeg",
+    "hero_video": "./assets/videos/desktop-hero.mov",
+    "hero_video_mobile": "./assets/videos/mobile-hero.mov",
+    "birthday_message": "Happy Birthday, Superstar. This is my fan-made tribute, written in fire, blood-red frames, and goosebumps."
+  },
+  "chapters": [
+    {
+      "kicker": "Chapter 01",
+      "title": "The Arrival",
+      "quote": "Before the roar, there was the first time I believed in a star."
+    },
+    {
+      "kicker": "Chapter 02",
+      "title": "The Journey",
+      "quote": "I CAN'T EXPLAIN THE AMOUNT OF HIGH I GET BEING HIS FAN."
+    },
+    {
+      "kicker": "Chapter 03",
+      "title": "The Films",
+      "quote": "Every film is a memory. Every memory has a theatre inside it."
+    },
+    {
+      "kicker": "Chapter 04",
+      "title": "Beyond Cinema",
+      "quote": "The love is not only for the star. It is for the person behind the light."
+    }
+  ],
+  "timeline": [
+    {
+      "year": "1975",
+      "age": 0,
+      "event": "Born into a cinema family in Chennai",
+      "description": "The son of Telugu cinema legend Krishna, Mahesh Babu grew up with cinema as atmosphere.",
+      "image": "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=1200&q=80",
+      "era": "origin"
+    },
+    {
+      "year": "1979",
+      "age": 4,
+      "event": "First screen appearance",
+      "description": "His journey began early as a child artist, introducing audiences to a face that would later define an era.",
+      "image": "https://images.unsplash.com/photo-1524712245354-2c4e5e7121c0?auto=format&fit=crop&w=1200&q=80",
+      "era": "childhood"
+    },
+    {
+      "year": "1999",
+      "age": 24,
+      "event": "Lead debut with Raja Kumarudu",
+      "description": "A romantic lead debut that announced a new star with charm, restraint, and screen ease.",
+      "image": "https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=1200&q=80",
+      "era": "debut"
+    },
+    {
+      "year": "2003",
+      "age": 28,
+      "event": "Okkadu raises the scale",
+      "description": "The athletic hero, the emotional stakes, and the mass appeal aligned into a defining milestone.",
+      "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
+      "era": "rise"
+    },
+    {
+      "year": "2005",
+      "age": 30,
+      "event": "Athadu becomes a cult classic",
+      "description": "A colder, sharper, quieter star image took hold and stayed with audiences for years.",
+      "image": "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=1200&q=80",
+      "era": "style"
+    },
+    {
+      "year": "2006",
+      "age": 31,
+      "event": "Pokiri changes the temperature",
+      "description": "A mass phenomenon that made attitude itself feel cinematic.",
+      "image": "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=1200&q=80",
+      "era": "phenomenon"
+    },
+    {
+      "year": "2011",
+      "age": 36,
+      "event": "Dookudu becomes a celebration",
+      "description": "Comedy, action, family drama, and star presence met in a film that became a festival for fans.",
+      "image": "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80",
+      "era": "blockbuster"
+    },
+    {
+      "year": "2015",
+      "age": 40,
+      "event": "Srimanthudu blends stardom with purpose",
+      "description": "A major commercial film carried an emotional idea of responsibility and giving back.",
+      "image": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=80",
+      "era": "purpose"
+    },
+    {
+      "year": "2019",
+      "age": 44,
+      "event": "Maharshi marks the 25th film",
+      "description": "A career milestone framed around ambition, friendship, and roots.",
+      "image": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80",
+      "era": "milestone"
+    },
+    {
+      "year": "2024",
+      "age": 48,
+      "event": "Guntur Kaaram keeps the fire alive",
+      "description": "The star image returns with swagger, family emotion, and theatrical energy.",
+      "image": "https://images.unsplash.com/photo-1505686994434-e3cc5abf1330?auto=format&fit=crop&w=1200&q=80",
+      "era": "present"
+    }
+  ],
+  "films": [
+    {
+      "id": "raja_kumarudu",
+      "title": "Raja Kumarudu",
+      "year": 1999,
+      "director": "K. Raghavendra Rao",
+      "poster": "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=900&q=80",
+      "trailer_url": "",
+      "collection": "Lead debut",
+      "awards": ["Filmfare Award for Best Male Debut - South"],
+      "role": "Raja",
+      "genre": ["Romance", "Drama"],
+      "decade": "1990s",
+      "milestone": "debut",
+      "description": "The arrival of Mahesh Babu as a lead actor."
+    },
+    {
+      "id": "okkadu",
+      "title": "Okkadu",
+      "year": 2003,
+      "director": "Gunasekhar",
+      "poster": "https://images.unsplash.com/photo-1505842465776-3f4953ca4f81?auto=format&fit=crop&w=900&q=80",
+      "trailer_url": "",
+      "collection": "Blockbuster",
+      "awards": ["Filmfare Best Actor - Telugu"],
+      "role": "Ajay",
+      "genre": ["Action", "Romance"],
+      "decade": "2000s",
+      "milestone": "breakthrough",
+      "description": "A defining commercial breakthrough with scale and emotional force."
+    },
+    {
+      "id": "athadu",
+      "title": "Athadu",
+      "year": 2005,
+      "director": "Trivikram Srinivas",
+      "poster": "https://images.unsplash.com/photo-1518929458119-e5bf444c30f4?auto=format&fit=crop&w=900&q=80",
+      "trailer_url": "",
+      "collection": "Cult classic",
+      "awards": ["Nandi recognition"],
+      "role": "Nandu",
+      "genre": ["Action", "Drama"],
+      "decade": "2000s",
+      "milestone": "cult",
+      "description": "The calm, controlled star persona sharpened into a cult favorite."
+    },
+    {
+      "id": "pokiri",
+      "title": "Pokiri",
+      "year": 2006,
+      "director": "Puri Jagannadh",
+      "poster": "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=900&q=80",
+      "trailer_url": "",
+      "collection": "Industry hit",
+      "awards": ["Mass phenomenon"],
+      "role": "Pandu / Krishna Manohar",
+      "genre": ["Action", "Crime"],
+      "decade": "2000s",
+      "milestone": "phenomenon",
+      "description": "An attitude-driven landmark that turned swagger into cinema history."
+    },
+    {
+      "id": "dookudu",
+      "title": "Dookudu",
+      "year": 2011,
+      "director": "Srinu Vaitla",
+      "poster": "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=900&q=80",
+      "trailer_url": "",
+      "collection": "Blockbuster",
+      "awards": ["Filmfare Best Actor - Telugu"],
+      "role": "Ajay Kumar",
+      "genre": ["Action", "Comedy"],
+      "decade": "2010s",
+      "milestone": "blockbuster",
+      "description": "A full-volume entertainer that became a celebration of star power."
+    },
+    {
+      "id": "businessman",
+      "title": "Businessman",
+      "year": 2012,
+      "director": "Puri Jagannadh",
+      "poster": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80",
+      "trailer_url": "",
+      "collection": "Hit",
+      "awards": ["Fan favorite"],
+      "role": "Surya Bhai",
+      "genre": ["Action", "Crime"],
+      "decade": "2010s",
+      "milestone": "style",
+      "description": "Sharp dialogue, controlled arrogance, and a magnetic antihero energy."
+    },
+    {
+      "id": "srimanthudu",
+      "title": "Srimanthudu",
+      "year": 2015,
+      "director": "Koratala Siva",
+      "poster": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80",
+      "trailer_url": "",
+      "collection": "Blockbuster",
+      "awards": ["Filmfare Best Actor - Telugu"],
+      "role": "Harsha",
+      "genre": ["Drama", "Action"],
+      "decade": "2010s",
+      "milestone": "purpose",
+      "description": "A star vehicle with a social heartbeat."
+    },
+    {
+      "id": "bharat_ane_nenu",
+      "title": "Bharat Ane Nenu",
+      "year": 2018,
+      "director": "Koratala Siva",
+      "poster": "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=900&q=80",
+      "trailer_url": "",
+      "collection": "Blockbuster",
+      "awards": ["Critical and commercial acclaim"],
+      "role": "Bharat Ram",
+      "genre": ["Political", "Drama"],
+      "decade": "2010s",
+      "milestone": "statesman",
+      "description": "A dignified political drama built around responsibility and command."
+    },
+    {
+      "id": "maharshi",
+      "title": "Maharshi",
+      "year": 2019,
+      "director": "Vamshi Paidipally",
+      "poster": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=80",
+      "trailer_url": "",
+      "collection": "Major success",
+      "awards": ["National Film Award for Best Popular Film Providing Wholesome Entertainment"],
+      "role": "Rishi",
+      "genre": ["Drama", "Action"],
+      "decade": "2010s",
+      "milestone": "25th film",
+      "description": "The 25th film brought ambition, roots, and reflection together."
+    },
+    {
+      "id": "sarileru_neekevvaru",
+      "title": "Sarileru Neekevvaru",
+      "year": 2020,
+      "director": "Anil Ravipudi",
+      "poster": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80",
+      "trailer_url": "",
+      "collection": "Blockbuster",
+      "awards": ["Festival entertainer"],
+      "role": "Ajay Krishna",
+      "genre": ["Action", "Comedy"],
+      "decade": "2020s",
+      "milestone": "festival",
+      "description": "A crowd-pleasing star celebration."
+    },
+    {
+      "id": "sarkaru_vaari_paata",
+      "title": "Sarkaru Vaari Paata",
+      "year": 2022,
+      "director": "Parasuram",
+      "poster": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=900&q=80",
+      "trailer_url": "",
+      "collection": "Commercial success",
+      "awards": ["Fan favorite style moments"],
+      "role": "Mahi",
+      "genre": ["Action", "Drama"],
+      "decade": "2020s",
+      "milestone": "style",
+      "description": "A modern star turn built on style, charm, and rhythm."
+    },
+    {
+      "id": "guntur_kaaram",
+      "title": "Guntur Kaaram",
+      "year": 2024,
+      "director": "Trivikram Srinivas",
+      "poster": "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=900&q=80",
+      "trailer_url": "",
+      "collection": "Theatrical event",
+      "awards": ["Mass comeback energy"],
+      "role": "Venkata Ramana",
+      "genre": ["Action", "Family"],
+      "decade": "2020s",
+      "milestone": "current",
+      "description": "A swagger-forward return to theatrical star energy."
+    }
+  ],
+  "stats": {
+    "total_films": 28,
+    "years_in_industry": 47,
+    "debut_year": 1979,
+    "lead_debut_year": 1999,
+    "box_office_total": "₹2000+ Crores",
+    "box_office_number": 2000,
+    "awards_total": 40,
+    "filmfare_awards": 8,
+    "nandi_awards": 5,
+    "fan_clubs_worldwide": 1200,
+    "social_media_followers": 18000000
+  },
+  "dialogues": [
+    {
+      "line": "Once I commit, I do not listen to myself.",
+      "film": "Pokiri",
+      "year": 2006,
+      "scene_context": "The line that became a shorthand for attitude."
+    },
+    {
+      "line": "Fear can hear silence too.",
+      "film": "Athadu",
+      "year": 2005,
+      "scene_context": "A tribute phrasing inspired by the film's restrained intensity."
+    },
+    {
+      "line": "The right man does not need volume.",
+      "film": "Bharat Ane Nenu",
+      "year": 2018,
+      "scene_context": "A tribute phrasing inspired by the dignity of the role."
+    },
+    {
+      "line": "Class is calm. Mass is timing.",
+      "film": "Career Essence",
+      "year": 2026,
+      "scene_context": "A tribute line for the persona fans celebrate."
+    }
+  ],
+  "philanthropy": [
+    {
+      "initiative": "Mahesh Babu Foundation",
+      "description": "A platform associated with healthcare support, child welfare, and meaningful interventions for families in need.",
+      "image": "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1200&q=80",
+      "year_started": 2019
+    },
+    {
+      "initiative": "Healing Little Hearts",
+      "description": "Support connected with pediatric heart care, giving children and families a chance at healthier futures.",
+      "image": "https://images.unsplash.com/photo-1530497610245-94d3c16cda28?auto=format&fit=crop&w=1200&q=80",
+      "year_started": 2016
+    },
+    {
+      "initiative": "Village Adoption Inspiration",
+      "description": "A public image shaped by responsibility, giving back, and the idea that success should return to society.",
+      "image": "https://images.unsplash.com/photo-1469571486292-b53601020a58?auto=format&fit=crop&w=1200&q=80",
+      "year_started": 2015
+    }
+  ],
+  "personality": [
+    {
+      "trait": "Silence",
+      "copy": "A pause before the line. A look before the storm."
+    },
+    {
+      "trait": "Style",
+      "copy": "Clean, controlled, effortless. The frame knows where to look."
+    },
+    {
+      "trait": "Timing",
+      "copy": "The dialogue lands because the stillness arrives first."
+    },
+    {
+      "trait": "Warmth",
+      "copy": "Beyond the scale, there is a softness fans hold close."
+    }
+  ],
+  "gallery": [
+    {
+      "url": "https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=1200&q=80",
+      "caption": "The theatre as temple",
+      "era": "cinema",
+      "type": "atmosphere"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=1200&q=80",
+      "caption": "A frame waiting for a star",
+      "era": "memory",
+      "type": "portrait"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1524712245354-2c4e5e7121c0?auto=format&fit=crop&w=1200&q=80",
+      "caption": "The projector remembers",
+      "era": "memory",
+      "type": "texture"
+    }
+  ],
+  "closing": {
+    "wish_title": "Happy Birthday, Superstar",
+    "wish_subtitle": "For the calm. For the class. For the memories.",
+    "wish_body": "From a child artist who grew inside cinema to a star whose stillness can fill a theatre, this is my birthday wish written in frames, gold, and gratitude.",
+    "signature": "From your fans, forever"
+  }
+}

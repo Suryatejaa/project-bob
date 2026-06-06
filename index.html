@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mahesh Babu | A Fan's Birthday Tribute</title>
+    <meta
+      name="description"
+      content="A cinematic scroll-driven birthday tribute to Mahesh Babu from one of his biggest fans."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Mono:wght@300;400&family=Playfair+Display:wght@400;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="cursor cursor-dot" aria-hidden="true"></div>
+    <div class="cursor cursor-ring" aria-hidden="true"></div>
+
+    <div class="preloader" data-preloader>
+      <div class="preloader-glow"></div>
+      <div class="preloader-name" data-preloader-name></div>
+      <div class="preloader-track">
+        <div class="preloader-bar" data-preloader-bar></div>
+      </div>
+    </div>
+
+    <main id="app" class="site-shell" aria-live="polite"></main>
+
+    <div class="film-modal" data-film-modal aria-hidden="true">
+      <button class="modal-close interactive" data-modal-close aria-label="Close film details">×</button>
+      <div class="modal-backdrop" data-modal-close></div>
+      <article class="modal-panel" data-modal-panel></article>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/countup.js@2.8.0/dist/countUp.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <script src="./main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hex Image Sphere</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background:
+      radial-gradient(circle at 50% 42%, rgba(190, 0, 22, 0.13), transparent 34%),
+      #050506;
+    overflow: hidden;
+    font-family: 'Courier New', monospace;
+    overscroll-behavior: none;
+  }
+  canvas { display: block; touch-action: none; }
+  #ui {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 10px; z-index: 10;
+  }
+  .btn {
+    background: rgba(0,0,0,0.38); border: 1px solid rgba(218,0,25,0.38);
+    color: rgba(255,255,255,0.82); padding: 9px 18px; border-radius: 2px;
+    font-size: 11px; letter-spacing: 0.1em; cursor: pointer; transition: all 0.2s;
+    backdrop-filter: blur(10px); text-transform: uppercase;
+  }
+  .btn:hover { background: rgba(218,0,25,0.18); color: #fff; border-color: rgba(218,0,25,0.72); }
+  #info {
+    position: fixed; top: 22px; left: 50%; transform: translateX(-50%);
+    color: rgba(255,255,255,0.42); font-size: 11px; letter-spacing: 0.14em;
+    text-transform: uppercase; pointer-events: none; white-space: nowrap;
+  }
+  #hexHud {
+    position: fixed;
+    right: clamp(18px, 4vw, 56px);
+    top: 50%;
+    transform: translateY(-50%) translateX(18px);
+    width: min(360px, calc(100vw - 36px));
+    border: 1px solid rgba(255, 20, 48, 0.56);
+    background:
+      linear-gradient(135deg, rgba(255, 20, 48, 0.16), transparent 36%),
+      rgba(5, 0, 5, 0.78);
+    box-shadow:
+      0 0 34px rgba(255, 20, 48, 0.18),
+      inset 0 0 28px rgba(255, 20, 48, 0.08);
+    color: #fff4f4;
+    opacity: 0;
+    padding: 18px 18px 16px;
+    pointer-events: none;
+    z-index: 9;
+    clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+    transition: opacity 220ms ease, transform 220ms ease;
+  }
+  #hexHud.is-active {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+  #hexHud::before,
+  #hexHud::after {
+    content: "";
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+    opacity: 0.38;
+  }
+  #hexHud::before { top: 8px; }
+  #hexHud::after { bottom: 8px; }
+  .hud-kicker,
+  .hud-meta {
+    color: #ff3149;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+  .hud-title {
+    color: #ffffff;
+    font-size: clamp(22px, 3vw, 36px);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 0.95;
+    margin: 10px 0 12px;
+    text-shadow: 2px 2px 0 rgba(255, 20, 48, 0.5);
+  }
+  .hud-body {
+    color: rgba(255, 235, 235, 0.84);
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    line-height: 1.7;
+    min-height: 68px;
+  }
+  .hud-cursor {
+    animation: hudBlink 0.7s steps(1) infinite;
+    color: #ff3149;
+  }
+  @keyframes hudBlink { 50% { opacity: 0; } }
+  @media (max-width: 680px) {
+    #ui { bottom: 16px; width: calc(100vw - 28px); justify-content: center; }
+    .btn { flex: 1; max-width: 128px; min-height: 44px; padding-inline: 8px; }
+    #info { top: 16px; font-size: 10px; }
+    #hexHud {
+      bottom: 74px;
+      left: 14px;
+      right: 14px;
+      top: auto;
+      transform: translateY(16px);
+      width: auto;
+      padding: 14px 14px 12px;
+    }
+    #hexHud.is-active {
+      transform: translateY(0);
+    }
+    .hud-body { min-height: 52px; }
+  }
+</style>
+</head>
+<body>
+<div id="info">hover / tap to pop · drag to rotate</div>
+<aside id="hexHud" aria-live="polite">
+  <div class="hud-kicker" data-hud-kicker>Hex memory</div>
+  <h2 class="hud-title" data-hud-title></h2>
+  <p class="hud-body"><span data-hud-body></span><span class="hud-cursor">_</span></p>
+  <div class="hud-meta" data-hud-meta></div>
+</aside>
+<div id="ui">
+  <button class="btn" id="btnExplode">Explode All</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const NUM_TILES     = 30;
+const SPHERE_RADIUS = 1.40;
+const HEX_GAP_RATIO = 0.01;
+const HEX_DEPTH     = 0.026;
+const POP_DIST      = 0.24;
+const EASING        = 0.14;
+
+// ── YOUR IMAGES ──────────────────────────────────────────────────────────────
+// Add 30 files as ./assets/hex/01.png, ./assets/hex/02.png ... ./assets/hex/30.png.
+// Each hex tile maps to the image with the same 1-based number.
+const HEX_IMAGE_COUNT = NUM_TILES;
+const IMAGE_URLS = Array.from(
+  { length: HEX_IMAGE_COUNT },
+  (_, i) => `./assets/hex/${String(i + 1).padStart(2, '0')}.png`
+);
+
+const DEFAULT_HEX_INFOS = Array.from({ length: NUM_TILES }, (_, i) => ({
+  kicker: `Memory node ${String(i + 1).padStart(2, '0')}`,
+  title: `Mahesh Frame ${String(i + 1).padStart(2, '0')}`,
+  body: 'Replace this line with the story behind this image: film, scene, year, emotion, or why this moment matters to you as a fan.',
+  meta: `assets/hex/${String(i + 1).padStart(2, '0')}.png`
+}));
+let hexInfos = DEFAULT_HEX_INFOS;
+
+fetch('./hex-notes.json')
+  .then(response => response.ok ? response.json() : Promise.reject(new Error('hex-notes.json not found')))
+  .then(notes => {
+    const byId = new Map(notes.map(note => [String(note.id).padStart(2, '0'), note]));
+    hexInfos = DEFAULT_HEX_INFOS.map((fallback, i) => {
+      const id = String(i + 1).padStart(2, '0');
+      return { ...fallback, ...(byId.get(id) || {}) };
+    });
+  })
+  .catch(error => {
+    console.warn('Using fallback hex notes:', error.message);
+  });
+
+const hud = {
+  root: document.getElementById('hexHud'),
+  kicker: document.querySelector('[data-hud-kicker]'),
+  title: document.querySelector('[data-hud-title]'),
+  body: document.querySelector('[data-hud-body]'),
+  meta: document.querySelector('[data-hud-meta]'),
+  activeIndex: -1,
+  typingTimer: null,
+  typingFrame: null,
+};
+
+let audioCtx = null;
+function unlockAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function playPopSfx() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  const sweep = audioCtx.createBiquadFilter();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(92, now);
+  osc.frequency.exponentialRampToValueAtTime(280, now + 0.08);
+  sweep.type = 'lowpass';
+  sweep.frequency.setValueAtTime(1200, now);
+  sweep.frequency.exponentialRampToValueAtTime(260, now + 0.14);
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(0.16, now + 0.012);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
+  osc.connect(sweep).connect(gain).connect(audioCtx.destination);
+  osc.start(now);
+  osc.stop(now + 0.18);
+}
+
+function playCyberTextIntroSfx() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const gain = audioCtx.createGain();
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.setValueAtTime(950, now);
+  filter.frequency.exponentialRampToValueAtTime(2600, now + 0.09);
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(0.08, now + 0.018);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+  filter.connect(gain).connect(audioCtx.destination);
+
+  [180, 360, 720, 1440].forEach((freq, index) => {
+    const osc = audioCtx.createOscillator();
+    osc.type = index % 2 ? 'square' : 'sawtooth';
+    osc.frequency.setValueAtTime(freq, now + index * 0.018);
+    osc.frequency.exponentialRampToValueAtTime(freq * 1.22, now + 0.18);
+    osc.connect(filter);
+    osc.start(now + index * 0.018);
+    osc.stop(now + 0.22);
+  });
+}
+
+function typeHudBody(text) {
+  clearTimeout(hud.typingTimer);
+  if (hud.typingFrame) cancelAnimationFrame(hud.typingFrame);
+  hud.body.textContent = '';
+  playCyberTextIntroSfx();
+  const duration = 1000;
+  const startedAt = performance.now();
+
+  function tick(now) {
+    const progress = Math.min(1, (now - startedAt) / duration);
+    const chars = Math.ceil(text.length * progress);
+    hud.body.textContent = text.slice(0, chars);
+    if (progress < 1) {
+      hud.typingFrame = requestAnimationFrame(tick);
+    } else {
+      hud.typingFrame = null;
+    }
+  }
+  hud.typingFrame = requestAnimationFrame(tick);
+}
+
+function showHexInfo(index, withSound = false) {
+  if (index < 0 || !hexInfos[index]) {
+    hud.activeIndex = -1;
+    hud.root.classList.remove('is-active');
+    clearTimeout(hud.typingTimer);
+    if (hud.typingFrame) cancelAnimationFrame(hud.typingFrame);
+    hud.typingFrame = null;
+    return;
+  }
+  if (hud.activeIndex === index) return;
+  hud.activeIndex = index;
+  const info = hexInfos[index];
+  hud.kicker.textContent = info.kicker;
+  hud.title.textContent = info.title;
+  hud.meta.textContent = info.meta;
+  hud.root.classList.add('is-active');
+  if (withSound) playPopSfx();
+  typeHudBody(info.body);
+}
+
+// ── Scene ─────────────────────────────────────────────────────────────────────
+const scene    = new THREE.Scene();
+const camera   = new THREE.PerspectiveCamera(48, innerWidth / innerHeight, 0.1, 100);
+camera.position.set(0, 0, innerWidth < 700 ? 8.25 : 4.25);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+document.body.appendChild(renderer.domElement);
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.82));
+const sun = new THREE.DirectionalLight(0xffffff, 1.45);
+sun.position.set(4, 5, 4);
+scene.add(sun);
+const rim = new THREE.DirectionalLight(0xff1c2f, 1.05);
+rim.position.set(-4, -3, -3);
+scene.add(rim);
+const fill = new THREE.PointLight(0xffd0d8, 1.05, 12);
+fill.position.set(2, 1, 3);
+scene.add(fill);
+
+// ── Galaxy field ─────────────────────────────────────────────────────────────
+function makeCircleTexture(color = '255,255,255') {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 96;
+  const ctx = canvas.getContext('2d');
+  const g = ctx.createRadialGradient(48, 48, 0, 48, 48, 48);
+  g.addColorStop(0, `rgba(${color},1)`);
+  g.addColorStop(0.28, `rgba(${color},0.72)`);
+  g.addColorStop(1, `rgba(${color},0)`);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 96, 96);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.needsUpdate = true;
+  return tex;
+}
+
+function makeShootingStarTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 96;
+  const ctx = canvas.getContext('2d');
+
+  const tail = ctx.createLinearGradient(0, 48, 512, 48);
+  tail.addColorStop(0, 'rgba(255,255,255,0)');
+  tail.addColorStop(0.16, 'rgba(120,170,255,0.12)');
+  tail.addColorStop(0.58, 'rgba(255,120,170,0.55)');
+  tail.addColorStop(0.88, 'rgba(255,245,225,0.92)');
+  tail.addColorStop(1, 'rgba(255,255,255,0)');
+
+  ctx.fillStyle = tail;
+  ctx.beginPath();
+  ctx.moveTo(18, 48);
+  ctx.quadraticCurveTo(260, 18, 480, 34);
+  ctx.quadraticCurveTo(508, 48, 480, 62);
+  ctx.quadraticCurveTo(260, 78, 18, 48);
+  ctx.closePath();
+  ctx.fill();
+
+  const head = ctx.createRadialGradient(438, 48, 0, 438, 48, 42);
+  head.addColorStop(0, 'rgba(255,255,255,1)');
+  head.addColorStop(0.32, 'rgba(255,215,230,0.86)');
+  head.addColorStop(1, 'rgba(255,80,140,0)');
+  ctx.fillStyle = head;
+  ctx.fillRect(380, 0, 132, 96);
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.needsUpdate = true;
+  return tex;
+}
+
+function createStarField(count, radius, size, opacity) {
+  const positions = new Float32Array(count * 3);
+  const colors = new Float32Array(count * 3);
+  const palette = [
+    [1.0, 0.88, 0.64],
+    [0.68, 0.82, 1.0],
+    [1.0, 0.48, 0.68],
+    [0.78, 0.58, 1.0],
+    [0.74, 1.0, 0.92],
+    [1.0, 1.0, 1.0],
+  ];
+
+  for (let i = 0; i < count; i++) {
+    const u = Math.random();
+    const v = Math.random();
+    const theta = 2 * Math.PI * u;
+    const phi = Math.acos(2 * v - 1);
+    const r = radius * (0.72 + Math.random() * 0.28);
+    const x = r * Math.sin(phi) * Math.cos(theta);
+    const y = r * Math.cos(phi);
+    const z = r * Math.sin(phi) * Math.sin(theta);
+    const color = palette[Math.floor(Math.random() * palette.length)];
+    const intensity = 0.78 + Math.random() * 0.42;
+
+    positions.set([x, y, z], i * 3);
+    colors.set([
+      Math.min(1, color[0] * intensity),
+      Math.min(1, color[1] * intensity),
+      Math.min(1, color[2] * intensity),
+    ], i * 3);
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+  const mat = new THREE.PointsMaterial({
+    size,
+    map: makeCircleTexture(),
+    transparent: true,
+    opacity,
+    vertexColors: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  });
+
+  const stars = new THREE.Points(geo, mat);
+  stars.renderOrder = -4;
+  scene.add(stars);
+  return stars;
+}
+
+function createMilkyWayBand(count) {
+  const positions = new Float32Array(count * 3);
+  const colors = new Float32Array(count * 3);
+  const dustPalette = [
+    [1.0, 0.32, 0.46],
+    [0.52, 0.72, 1.0],
+    [0.96, 0.78, 0.46],
+    [0.72, 0.42, 1.0],
+    [0.82, 1.0, 0.94],
+  ];
+
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const radius = 5.9 + Math.random() * 2.6;
+    const bandNoise = (Math.random() - 0.5) * 0.95;
+    const y = bandNoise + Math.sin(angle * 2.2) * 0.22;
+    const x = Math.cos(angle) * radius;
+    const z = Math.sin(angle) * radius;
+    const dust = dustPalette[Math.floor(Math.random() * dustPalette.length)];
+    const intensity = 0.54 + Math.random() * 0.54;
+
+    positions.set([x, y, z], i * 3);
+    colors.set([
+      Math.min(1, dust[0] * intensity),
+      Math.min(1, dust[1] * intensity),
+      Math.min(1, dust[2] * intensity),
+    ], i * 3);
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const mat = new THREE.PointsMaterial({
+    size: innerWidth < 700 ? 0.032 : 0.022,
+    map: makeCircleTexture('255,210,220'),
+    transparent: true,
+    opacity: 0.32,
+    vertexColors: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  });
+
+  const band = new THREE.Points(geo, mat);
+  band.rotation.set(0.44, 0.08, -0.34);
+  band.renderOrder = -3;
+  scene.add(band);
+  return band;
+}
+
+function createShootingStar() {
+  const mat = new THREE.SpriteMaterial({
+    map: makeShootingStarTexture(),
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+  const sprite = new THREE.Sprite(mat);
+  sprite.renderOrder = -2;
+  sprite.visible = false;
+  scene.add(sprite);
+  return {
+    sprite,
+    mat,
+    active: false,
+    life: 0,
+    duration: 1,
+    start: new THREE.Vector3(),
+    end: new THREE.Vector3(),
+    baseScale: new THREE.Vector3(),
+  };
+}
+
+const farStars = createStarField(innerWidth < 700 ? 1100 : 2100, 9.8, innerWidth < 700 ? 0.047 : 0.032, 0.88);
+const nearStars = createStarField(innerWidth < 700 ? 260 : 420, 6.2, innerWidth < 700 ? 0.074 : 0.05, 0.76);
+const milkyWay = createMilkyWayBand(innerWidth < 700 ? 1700 : 3200);
+const shootingStars = Array.from({ length: innerWidth < 700 ? 5 : 8 }, createShootingStar);
+let nextShootingStarAt = 0.2;
+
+function launchShootingStar(star) {
+  const side = Math.random() > 0.5 ? 1 : -1;
+  const startY = 2.3 + Math.random() * 2.9;
+  const startX = side * (3.7 + Math.random() * 2.5);
+  const travelX = -side * (4.2 + Math.random() * 2.1);
+  const travelY = -(1.45 + Math.random() * 1.2);
+
+  star.start.set(startX, startY, -2.8 - Math.random() * 1.6);
+  star.end.set(startX + travelX, startY + travelY, star.start.z);
+  star.sprite.position.copy(star.start);
+  star.sprite.material.rotation = Math.atan2(travelY, travelX);
+  star.baseScale.set(innerWidth < 700 ? 1.15 : 1.55, innerWidth < 700 ? 0.16 : 0.2, 1);
+  star.sprite.scale.copy(star.baseScale);
+  star.duration = 0.72 + Math.random() * 0.42;
+  star.life = 0;
+  star.active = true;
+  star.mat.opacity = 0;
+  star.sprite.visible = true;
+}
+
+// ── Fibonacci sphere ──────────────────────────────────────────────────────────
+function fibonacciSphere(n) {
+  const pts = [], phi = Math.PI * (3 - Math.sqrt(5));
+  for (let i = 0; i < n; i++) {
+    const y = 1 - ((i + 0.5) / n) * 2;
+    const r = Math.sqrt(Math.max(0, 1 - y * y));
+    const t = phi * i;
+    pts.push(new THREE.Vector3(r * Math.cos(t), y, r * Math.sin(t)));
+  }
+  return pts;
+}
+
+function getMinChordDistance(points, radius) {
+  let min = Infinity;
+  for (let i = 0; i < points.length; i++) {
+    for (let j = i + 1; j < points.length; j++) {
+      min = Math.min(min, points[i].distanceTo(points[j]) * radius);
+    }
+  }
+  return min;
+}
+
+function getSafeHexSize(points, radius, gapRatio) {
+  const minCenterDistance = getMinChordDistance(points, radius);
+  return (minCenterDistance * (1 - gapRatio)) / 2;
+}
+
+// ── Hex geometry ──────────────────────────────────────────────────────────────
+function makeHexGeo(size, depth) {
+  const shape = new THREE.Shape();
+  for (let i = 0; i < 6; i++) {
+    const a = (Math.PI / 3) * i + Math.PI / 6;
+    i === 0 ? shape.moveTo(size * Math.cos(a), size * Math.sin(a))
+            : shape.lineTo(size * Math.cos(a), size * Math.sin(a));
+  }
+  shape.closePath();
+  return new THREE.ExtrudeGeometry(shape, {
+    depth, bevelEnabled: true,
+    bevelThickness: 0.008, bevelSize: 0.006, bevelSegments: 2,
+  });
+}
+
+function makeHexFaceGeo(size) {
+  const shape = new THREE.Shape();
+  for (let i = 0; i < 6; i++) {
+    const a = (Math.PI / 3) * i + Math.PI / 6;
+    i === 0 ? shape.moveTo(size * Math.cos(a), size * Math.sin(a))
+            : shape.lineTo(size * Math.cos(a), size * Math.sin(a));
+  }
+  shape.closePath();
+  const geo = new THREE.ShapeGeometry(shape);
+  const pos = geo.attributes.position;
+  const uvs = [];
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i);
+    const y = pos.getY(i);
+    uvs.push((x / (size * 2)) + 0.5, (y / (size * 2)) + 0.5);
+  }
+  geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  return geo;
+}
+
+// ── Canvas texture with image clipped to hex ──────────────────────────────────
+function makeHexTexture(imgSrc) {
+  const RES = 512, cx = RES / 2, cy = RES / 2, r = RES * 0.46;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = RES;
+  const ctx = canvas.getContext('2d');
+  const tex = new THREE.CanvasTexture(canvas);
+
+  function drawHexClipped(drawFn) {
+    ctx.clearRect(0, 0, RES, RES);
+    ctx.save();
+    ctx.beginPath();
+    for (let i = 0; i < 6; i++) {
+      const a = (Math.PI / 3) * i + Math.PI / 6;
+      i === 0 ? ctx.moveTo(cx + r * Math.cos(a), cy + r * Math.sin(a))
+              : ctx.lineTo(cx + r * Math.cos(a), cy + r * Math.sin(a));
+    }
+    ctx.closePath();
+    ctx.clip();
+    drawFn();
+    ctx.restore();
+    // border ring
+    ctx.beginPath();
+    for (let i = 0; i < 6; i++) {
+      const a = (Math.PI / 3) * i + Math.PI / 6;
+      i === 0 ? ctx.moveTo(cx + r * Math.cos(a), cy + r * Math.sin(a))
+              : ctx.lineTo(cx + r * Math.cos(a), cy + r * Math.sin(a));
+    }
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(255,255,255,0.14)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    tex.needsUpdate = true;
+  }
+
+function fallback() {
+    drawHexClipped(() => {
+      const g = ctx.createLinearGradient(0, 0, RES, RES);
+      g.addColorStop(0, '#d90019'); g.addColorStop(1, '#120003');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, RES, RES);
+    });
+  }
+
+  fallback();
+  if (!imgSrc) return tex;
+
+  const img = new Image();
+  img.onload = () => {
+    drawHexClipped(() => {
+      const scale = Math.max(RES / img.width, RES / img.height);
+      const w = img.width * scale, h = img.height * scale;
+      ctx.drawImage(img, (RES - w) / 2, (RES - h) / 2, w, h);
+      // vignette
+      const vig = ctx.createRadialGradient(cx, cy, r * 0.5, cx, cy, r);
+      vig.addColorStop(0, 'rgba(0,0,0,0)');
+      vig.addColorStop(1, 'rgba(0,0,0,0.36)');
+      ctx.fillStyle = vig; ctx.fillRect(0, 0, RES, RES);
+    });
+  };
+  img.onerror = fallback;
+  img.src = imgSrc;
+  return tex;
+}
+
+// ── Build tiles ───────────────────────────────────────────────────────────────
+const hexGroup = new THREE.Group();
+scene.add(hexGroup);
+
+const hexTiles = [];
+const spherePoints = fibonacciSphere(NUM_TILES);
+const HEX_SIZE = getSafeHexSize(spherePoints, SPHERE_RADIUS, HEX_GAP_RATIO);
+const sharedGeo = makeHexGeo(HEX_SIZE, HEX_DEPTH);
+const sharedFaceGeo = makeHexFaceGeo(HEX_SIZE * 0.97);
+
+// Keep a flat list of only the Mesh objects for raycasting (not edges)
+const castMeshes = [];
+
+spherePoints.forEach((pt, i) => {
+  const sideMat = new THREE.MeshStandardMaterial({
+    color: 0x120003, roughness: 0.45, metalness: 0.55,
+  });
+
+  const mesh = new THREE.Mesh(sharedGeo, sideMat);
+  // tag so we can find it back from a child hit
+  mesh.userData.tileIndex = i;
+
+  const pos = pt.clone().normalize().multiplyScalar(SPHERE_RADIUS);
+  const dir = pos.clone().normalize();
+  mesh.position.copy(pos);
+  mesh.lookAt(0, 0, 0);
+  mesh.rotateZ(Math.PI / 2);
+
+  const imageFace = new THREE.Mesh(
+    sharedFaceGeo,
+    new THREE.MeshBasicMaterial({
+      map: makeHexTexture(IMAGE_URLS[i % IMAGE_URLS.length] || null),
+      color: 0xffffff,
+      side: THREE.DoubleSide,
+      depthTest: true,
+      depthWrite: false,
+    })
+  );
+  imageFace.renderOrder = 1;
+  imageFace.position.copy(pos.clone().addScaledVector(dir, 0.035));
+  imageFace.lookAt(0, 0, 0);
+  imageFace.rotateZ(Math.PI / 2);
+
+  // Edge lines are children but NOT in castMeshes
+  const edgeMat = new THREE.LineBasicMaterial({ color: 0xff1430, transparent: true, opacity: 0.26 });
+  mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(sharedGeo, 20), edgeMat));
+
+  hexGroup.add(mesh);
+  hexGroup.add(imageFace);
+  castMeshes.push(mesh);   // only real meshes
+  hexTiles.push({ mesh, imageFace, basePos: pos.clone(), baseDir: dir,
+                  popTarget: 0, popCurrent: 0, sideMat });
+});
+
+// ── Pointer state (shared between mouse and touch) ────────────────────────────
+const pointer   = new THREE.Vector2(-9, -9);
+const raycaster = new THREE.Raycaster();
+let lastTouchX = 0, lastTouchY = 0;
+
+function setPointer(clientX, clientY) {
+  pointer.x =  (clientX / innerWidth)  * 2 - 1;
+  pointer.y = -(clientY / innerHeight) * 2 + 1;
+}
+function clearPointer() { pointer.set(-9, -9); }
+
+// Mouse
+window.addEventListener('mousemove', e => setPointer(e.clientX, e.clientY));
+window.addEventListener('mouseleave', clearPointer);
+
+// Touch — hover while moving; tap toggles the touched tile out/in.
+renderer.domElement.addEventListener('touchstart',  e => {
+  e.preventDefault();
+  unlockAudio();
+  lastTouchX = e.touches[0].clientX; lastTouchY = e.touches[0].clientY;
+  setPointer(lastTouchX, lastTouchY);
+}, { passive: false });
+renderer.domElement.addEventListener('touchmove',   e => {
+  e.preventDefault();
+  lastTouchX = e.touches[0].clientX; lastTouchY = e.touches[0].clientY;
+  setPointer(lastTouchX, lastTouchY);
+}, { passive: false });
+renderer.domElement.addEventListener('touchend',    e => { e.preventDefault(); clearPointer(); },                            { passive: false });
+window.addEventListener('touchcancel', clearPointer);
+
+// ── Drag to rotate ────────────────────────────────────────────────────────────
+let autoSpin = true, isDragging = false;
+let prevMX = 0, prevMY = 0, rotVX = 0, rotVY = 0;
+let dragDist = 0;
+let activeTileIndex = -1;
+
+renderer.domElement.addEventListener('mousedown', e => {
+  unlockAudio();
+  isDragging = true; dragDist = 0;
+  prevMX = e.clientX; prevMY = e.clientY;
+});
+window.addEventListener('mouseup', () => { isDragging = false; if (dragDist < 4) autoSpin = true; });
+window.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  const dx = e.clientX - prevMX, dy = e.clientY - prevMY;
+  dragDist += Math.abs(dx) + Math.abs(dy);
+  rotVY += dx * 0.004; rotVX += dy * 0.004;
+  prevMX = e.clientX; prevMY = e.clientY;
+  if (dragDist > 4) autoSpin = false;
+});
+
+// Touch drag
+let touchDragDist = 0;
+renderer.domElement.addEventListener('touchstart', e => {
+  unlockAudio();
+  isDragging = true; touchDragDist = 0;
+  prevMX = e.touches[0].clientX; prevMY = e.touches[0].clientY;
+}, { passive: false });
+renderer.domElement.addEventListener('touchmove', e => {
+  if (!isDragging) return;
+  const dx = e.touches[0].clientX - prevMX, dy = e.touches[0].clientY - prevMY;
+  touchDragDist += Math.abs(dx) + Math.abs(dy);
+  rotVY += dx * 0.0048; rotVX += dy * 0.0048;
+  prevMX = e.touches[0].clientX; prevMY = e.touches[0].clientY;
+  if (touchDragDist > 6) autoSpin = false;
+}, { passive: false });
+window.addEventListener('touchend', () => {
+  if (isDragging && touchDragDist < 8) {
+    setPointer(lastTouchX, lastTouchY);
+    toggleNearestTile();
+    clearPointer();
+  }
+  isDragging = false;
+});
+
+// ── Buttons ───────────────────────────────────────────────────────────────────
+let explodeAll = false;
+document.getElementById('btnExplode').addEventListener('click', () => {
+  unlockAudio();
+  explodeAll = !explodeAll;
+  activeTileIndex = -1;
+  hexTiles.forEach(t => { t.popTarget = explodeAll ? 1 : 0; });
+  document.getElementById('btnExplode').textContent = explodeAll ? 'Collapse All' : 'Explode All';
+  if (explodeAll) {
+    playPopSfx();
+    showHexInfo(0, false);
+  } else {
+    showHexInfo(-1);
+  }
+});
+
+
+// ── Animate ───────────────────────────────────────────────────────────────────
+const clock = new THREE.Clock();
+let lastFrameTime = 0;
+
+function getHitTileIndex() {
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(castMeshes, false);
+  return hits.length ? hits[0].object.userData.tileIndex : -1;
+}
+
+function toggleNearestTile() {
+  const i = getHitTileIndex();
+  if (i < 0 || explodeAll) return;
+  activeTileIndex = activeTileIndex === i ? -1 : i;
+  if (activeTileIndex >= 0) {
+    showHexInfo(activeTileIndex, true);
+  } else {
+    showHexInfo(-1);
+  }
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+  const frameDelta = Math.min(0.033, t - lastFrameTime || 0.016);
+  lastFrameTime = t;
+
+  // Rotation
+  if (autoSpin && !isDragging) {
+    hexGroup.rotation.y += 0.0025;
+  }
+  if (!autoSpin || isDragging) {
+    hexGroup.rotation.y += rotVY;
+    hexGroup.rotation.x += rotVX;
+    rotVX *= 0.90; rotVY *= 0.90;
+    if (!isDragging && Math.abs(rotVX) < 0.0001 && Math.abs(rotVY) < 0.0001) autoSpin = true;
+  }
+
+  // ── Raycasting — only against tile meshes, not edge children ───────────────
+  const hoveredIndex = explodeAll ? -1 : getHitTileIndex();
+  if (activeTileIndex < 0 && !explodeAll) {
+    showHexInfo(hoveredIndex, false);
+  }
+
+  // ── Update each tile ───────────────────────────────────────────────────────
+  const cameraWorldPos = new THREE.Vector3();
+  const faceWorldPos = new THREE.Vector3();
+  const faceWorldDir = new THREE.Vector3();
+  camera.getWorldPosition(cameraWorldPos);
+
+  hexTiles.forEach((tile, i) => {
+    if (!explodeAll) tile.popTarget = (i === activeTileIndex || i === hoveredIndex) ? 1 : 0;
+
+    tile.popCurrent += (tile.popTarget - tile.popCurrent) * EASING;
+    const p = tile.popCurrent;
+
+    tile.mesh.position.copy(
+      tile.basePos.clone().addScaledVector(tile.baseDir, p * POP_DIST)
+    );
+    tile.imageFace.position.copy(
+      tile.basePos.clone().addScaledVector(tile.baseDir, 0.035 + p * POP_DIST)
+    );
+    tile.imageFace.getWorldPosition(faceWorldPos);
+    faceWorldDir.copy(tile.baseDir).transformDirection(hexGroup.matrixWorld);
+    tile.imageFace.visible = faceWorldDir.dot(cameraWorldPos.clone().sub(faceWorldPos).normalize()) > 0.08;
+    tile.sideMat.color.lerpColors(new THREE.Color(0x120003), new THREE.Color(0xda0019), p);
+  });
+
+  fill.position.x = Math.sin(t * 0.6) * 3;
+  fill.position.y = Math.cos(t * 0.4) * 2;
+
+  farStars.rotation.y += 0.00018;
+  nearStars.rotation.y -= 0.00032;
+  milkyWay.rotation.y += 0.00024;
+  milkyWay.material.opacity = 0.52 + Math.sin(t * 0.45) * 0.08;
+  nearStars.material.opacity = 0.68 + Math.sin(t * 1.2) * 0.12;
+
+  if (t > nextShootingStarAt) {
+    const available = shootingStars.find(star => !star.active);
+    if (available) launchShootingStar(available);
+    nextShootingStarAt = t + 3.2 + Math.random() * 4.8;
+  }
+
+  shootingStars.forEach(star => {
+    if (!star.active) return;
+    star.life += frameDelta;
+    const p = Math.min(1, star.life / star.duration);
+    const eased = 1 - Math.pow(1 - p, 2);
+    star.sprite.position.lerpVectors(star.start, star.end, eased);
+    star.mat.opacity = Math.sin(p * Math.PI) * 0.96;
+    const scalePulse = 0.84 + Math.sin(p * Math.PI) * 0.22;
+    star.sprite.scale.set(star.baseScale.x * scalePulse, star.baseScale.y, 1);
+    if (p >= 1) {
+      star.active = false;
+      star.mat.opacity = 0;
+      star.sprite.visible = false;
+    }
+  });
+
+  renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.position.z = innerWidth < 700 ? 8.25 : 4.25;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>
