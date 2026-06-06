@@ -32,7 +32,7 @@ async function init() {
 function renderSite(data) {
   app.innerHTML = `
     ${renderHero(data)}
-    ${renderChapter(data.chapters[1])}
+    ${renderHexSphereChapter(data.chapters[1])}
     ${renderTimeline(data.timeline)}
     ${renderPersonality(data)}
     ${renderChapter(data.chapters[2])}
@@ -91,6 +91,26 @@ function renderChapter(chapter) {
         <div class="kicker">${chapter.kicker}</div>
         <h2 class="chapter-title">${words}</h2>
         <p class="chapter-quote">${chapter.quote}</p>
+      </div>
+    </section>
+  `;
+}
+
+function renderHexSphereChapter(chapter) {
+  return `
+    <section class="section hex-chapter-section" data-hex-chapter>
+      <div class="hex-chapter-copy">
+        <div class="kicker">${chapter.kicker}</div>
+        <h2 class="hex-chapter-title">${chapter.title}</h2>
+        <p>${chapter.quote}</p>
+      </div>
+      <div class="hex-chapter-stage">
+        <iframe
+          src="./hexsphere.html"
+          title="Interactive Mahesh Babu fan memory sphere"
+          loading="lazy"
+          data-hex-frame
+        ></iframe>
       </div>
     </section>
   `;

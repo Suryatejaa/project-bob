@@ -359,6 +359,85 @@ video {
   max-width: 760px;
 }
 
+.hex-chapter-section {
+  background:
+    radial-gradient(circle at 48% 42%, rgba(255, 38, 56, 0.13), transparent 36vw),
+    linear-gradient(180deg, #030303, #090103 50%, #050505);
+  display: grid;
+  gap: clamp(24px, 4vw, 52px);
+  min-height: 100vh;
+  padding-bottom: clamp(36px, 6vw, 72px);
+  padding-top: clamp(48px, 6vw, 84px);
+}
+
+.hex-chapter-copy {
+  align-items: end;
+  display: grid;
+  gap: clamp(12px, 2vw, 22px);
+  grid-template-columns: minmax(0, 0.9fr) minmax(280px, 0.65fr);
+  position: relative;
+  z-index: 2;
+}
+
+.hex-chapter-copy .kicker,
+.hex-chapter-title {
+  grid-column: 1 / -1;
+}
+
+.hex-chapter-title {
+  color: var(--blood-bright);
+  font-family: "Playfair Display", serif;
+  font-size: clamp(58px, 9vw, 136px);
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 0.78;
+  margin: 0;
+  max-width: 100%;
+  text-transform: uppercase;
+  text-shadow:
+    5px 5px 0 #050505,
+    0 0 30px rgba(255, 38, 56, 0.36);
+}
+
+.hex-chapter-copy p {
+  color: rgba(244, 240, 230, 0.76);
+  font-size: clamp(18px, 2.2vw, 30px);
+  grid-column: 1 / 2;
+  line-height: 1.22;
+  margin: 0;
+  max-width: 620px;
+}
+
+.hex-chapter-stage {
+  border: 1px solid rgba(255, 38, 56, 0.24);
+  box-shadow:
+    0 0 80px rgba(181, 8, 18, 0.16),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.035);
+  height: min(78vh, 820px);
+  min-height: 620px;
+  overflow: hidden;
+  position: relative;
+}
+
+.hex-chapter-stage::before {
+  background:
+    linear-gradient(90deg, rgba(255, 38, 56, 0.45), transparent 22%, transparent 78%, rgba(255, 38, 56, 0.28)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 18%, transparent 86%, rgba(255, 38, 56, 0.2));
+  content: "";
+  inset: 0;
+  opacity: 0.22;
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+}
+
+.hex-chapter-stage iframe {
+  border: 0;
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
 .timeline-section {
   background: var(--black-soft);
   padding-bottom: 0;
@@ -967,6 +1046,35 @@ video {
 
   .scroll-indicator {
     display: none;
+  }
+
+  .hex-chapter-section {
+    gap: 24px;
+    min-height: 100svh;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .hex-chapter-copy {
+    display: block;
+    padding: 0 var(--section-padding-x);
+  }
+
+  .hex-chapter-title {
+    font-size: clamp(56px, 17vw, 86px);
+    margin-top: 12px;
+  }
+
+  .hex-chapter-copy p {
+    font-size: clamp(17px, 5vw, 24px);
+    margin-top: 18px;
+  }
+
+  .hex-chapter-stage {
+    border-left: 0;
+    border-right: 0;
+    height: 74svh;
+    min-height: 560px;
   }
 
   .timeline-section {
