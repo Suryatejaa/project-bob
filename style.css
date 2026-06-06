@@ -364,10 +364,11 @@ video {
     radial-gradient(circle at 48% 42%, rgba(255, 38, 56, 0.13), transparent 36vw),
     linear-gradient(180deg, #030303, #090103 50%, #050505);
   display: grid;
-  gap: clamp(24px, 4vw, 52px);
+  gap: clamp(18px, 2.4vw, 32px);
+  grid-template-rows: auto minmax(0, 1fr);
   min-height: 100vh;
-  padding-bottom: clamp(36px, 6vw, 72px);
-  padding-top: clamp(48px, 6vw, 84px);
+  padding-bottom: clamp(24px, 4vw, 56px);
+  padding-top: clamp(28px, 4vw, 56px);
 }
 
 .hex-chapter-copy {
@@ -387,7 +388,7 @@ video {
 .hex-chapter-title {
   color: var(--blood-bright);
   font-family: "Playfair Display", serif;
-  font-size: clamp(58px, 9vw, 136px);
+  font-size: clamp(56px, 7vw, 122px);
   font-weight: 900;
   letter-spacing: 0;
   line-height: 0.78;
@@ -401,7 +402,7 @@ video {
 
 .hex-chapter-copy p {
   color: rgba(244, 240, 230, 0.76);
-  font-size: clamp(18px, 2.2vw, 30px);
+  font-size: clamp(18px, 1.9vw, 28px);
   grid-column: 1 / 2;
   line-height: 1.22;
   margin: 0;
@@ -413,8 +414,7 @@ video {
   box-shadow:
     0 0 80px rgba(181, 8, 18, 0.16),
     inset 0 0 0 1px rgba(255, 255, 255, 0.035);
-  height: min(78vh, 820px);
-  min-height: 620px;
+  min-height: 0;
   overflow: hidden;
   position: relative;
 }
@@ -1050,6 +1050,7 @@ video {
 
   .hex-chapter-section {
     gap: 24px;
+    grid-template-rows: none;
     min-height: 100svh;
     padding-left: 0;
     padding-right: 0;

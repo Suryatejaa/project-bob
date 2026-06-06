@@ -273,7 +273,17 @@ function showHexInfo(index, withSound = false) {
 // ── Scene ─────────────────────────────────────────────────────────────────────
 const scene    = new THREE.Scene();
 const camera   = new THREE.PerspectiveCamera(48, innerWidth / innerHeight, 0.1, 100);
-camera.position.set(0, 0, innerWidth < 700 ? 8.25 : 4.25);
+
+function getCameraZ() {
+  const aspect = innerWidth / Math.max(1, innerHeight);
+  if (innerWidth < 700) return aspect < 0.62 ? 6.65 : 6.95;
+  if (aspect > 3.1) return 5.8;
+  if (aspect > 2.15) return 5.65;
+  if (aspect > 1.65) return 5.15;
+  return 4.55;
+}
+
+camera.position.set(0, 0, getCameraZ());
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 renderer.setSize(innerWidth, innerHeight);
@@ -708,6 +718,20 @@ let autoSpin = true, isDragging = false;
 let prevMX = 0, prevMY = 0, rotVX = 0, rotVY = 0;
 let dragDist = 0;
 let activeTileIndex = -1;
+let activePopTimer = null;
+
+function clearActivePopTimer() {
+  clearTimeout(activePopTimer);
+  activePopTimer = null;
+}
+
+function scheduleActivePopReset() {
+  clearActivePopTimer();
+  activePopTimer = setTimeout(() => {
+    activeTileIndex = -1;
+    showHexInfo(-1);
+  }, 5000);
+}
 
 renderer.domElement.addEventListener('mousedown', e => {
   unlockAudio();
@@ -753,14 +777,13 @@ let explodeAll = false;
 document.getElementById('btnExplode').addEventListener('click', () => {
   unlockAudio();
   explodeAll = !explodeAll;
+  clearActivePopTimer();
   activeTileIndex = -1;
+  showHexInfo(-1);
   hexTiles.forEach(t => { t.popTarget = explodeAll ? 1 : 0; });
   document.getElementById('btnExplode').textContent = explodeAll ? 'Collapse All' : 'Explode All';
   if (explodeAll) {
     playPopSfx();
-    showHexInfo(0, false);
-  } else {
-    showHexInfo(-1);
   }
 });
 
@@ -793,9 +816,11 @@ function getHitTileIndex() {
 function toggleNearestTile() {
   const i = getHitTileIndex();
   if (i < 0 || explodeAll) return;
+  clearActivePopTimer();
   activeTileIndex = activeTileIndex === i ? -1 : i;
   if (activeTileIndex >= 0) {
     showHexInfo(activeTileIndex, true);
+    scheduleActivePopReset();
   } else {
     showHexInfo(-1);
   }
@@ -885,7 +910,7 @@ animate();
 
 window.addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight;
-  camera.position.z = innerWidth < 700 ? 8.25 : 4.25;
+  camera.position.z = getCameraZ();
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
 });
