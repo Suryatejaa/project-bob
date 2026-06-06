@@ -132,7 +132,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 const NUM_TILES     = 30;
-const SPHERE_RADIUS = 1.80;
+const SPHERE_RADIUS = 1.60;
 const HEX_GAP_RATIO = 0.01;
 const HEX_DEPTH     = 0.026;
 const POP_DIST      = 0.24;
@@ -768,11 +768,26 @@ document.getElementById('btnExplode').addEventListener('click', () => {
 // ── Animate ───────────────────────────────────────────────────────────────────
 const clock = new THREE.Clock();
 let lastFrameTime = 0;
+const hitCameraWorldPos = new THREE.Vector3();
+const hitFaceWorldPos = new THREE.Vector3();
+const hitFaceWorldDir = new THREE.Vector3();
+
+function isTileFacingCamera(index, threshold = 0.08) {
+  const tile = hexTiles[index];
+  if (!tile) return false;
+  hexGroup.updateMatrixWorld(true);
+  camera.getWorldPosition(hitCameraWorldPos);
+  tile.imageFace.getWorldPosition(hitFaceWorldPos);
+  hitFaceWorldDir.copy(tile.baseDir).transformDirection(hexGroup.matrixWorld);
+  return hitFaceWorldDir.dot(hitCameraWorldPos.clone().sub(hitFaceWorldPos).normalize()) > threshold;
+}
 
 function getHitTileIndex() {
   raycaster.setFromCamera(pointer, camera);
   const hits = raycaster.intersectObjects(castMeshes, false);
-  return hits.length ? hits[0].object.userData.tileIndex : -1;
+  if (!hits.length) return -1;
+  const index = hits[0].object.userData.tileIndex;
+  return isTileFacingCamera(index) ? index : -1;
 }
 
 function toggleNearestTile() {
