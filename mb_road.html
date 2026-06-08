@@ -796,6 +796,88 @@ scene.add(sunLight);
 const nightAmbient = new THREE.AmbientLight(0x3a0206, 0.0);
 scene.add(nightAmbient);
 
+const bottomSpotGroup = new THREE.Group();
+scene.add(bottomSpotGroup);
+const bottomSpots = [];
+
+function makeSpotConeMaterial(color) {
+  return new THREE.MeshBasicMaterial({
+    color,
+    transparent: true,
+    opacity: 0.42,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    side: THREE.FrontSide,
+  });
+}
+
+function makeFloorGlowTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  const g = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+  g.addColorStop(0, 'rgba(255,255,255,0.9)');
+  g.addColorStop(0.24, 'rgba(255,120,140,0.44)');
+  g.addColorStop(0.62, 'rgba(255,38,56,0.14)');
+  g.addColorStop(1, 'rgba(255,38,56,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 256, 256);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.needsUpdate = true;
+  return tex;
+}
+
+const floorGlowTexture = makeFloorGlowTexture();
+
+function buildBottomSpotlights(targetPos = new THREE.Vector3(0, 2.8, -210), wallAngle = 0) {
+  while (bottomSpotGroup.children.length) {
+    const child = bottomSpotGroup.children[0];
+    child.traverse(o => {
+      if (o.geometry) o.geometry.dispose();
+      if (o.material) o.material.dispose();
+    });
+    bottomSpotGroup.remove(child);
+  }
+  bottomSpots.length = 0;
+
+  const colors = [0xff2638, 0x5ee8ff, 0x87ffbd];
+  const offsets = [-4.4, 0, 4.4];
+  const forward = new THREE.Vector3(Math.sin(wallAngle), 0, Math.cos(wallAngle));
+  const right = new THREE.Vector3(Math.cos(wallAngle), 0, -Math.sin(wallAngle));
+
+  offsets.forEach((offset, index) => {
+    const base = targetPos.clone()
+      .addScaledVector(right, offset)
+      .addScaledVector(forward, 5.2)
+      .setY(0.18);
+    const target = targetPos.clone()
+      .addScaledVector(right, offset * 0.22)
+      .setY(3.2);
+
+    const spot = new THREE.SpotLight(colors[index], index === 0 ? 10.5 : 8.2, 46, Math.PI / 4.4, 0.52, 0.75);
+    spot.position.copy(base);
+    spot.target.position.copy(target);
+    spot.castShadow = false;
+    bottomSpotGroup.add(spot, spot.target);
+
+    const glow = new THREE.Mesh(
+      new THREE.PlaneGeometry(4.8, 4.8),
+      new THREE.MeshBasicMaterial({
+        map: floorGlowTexture,
+        color: colors[index],
+        transparent: true,
+        opacity: index === 0 ? 0.52 : 0.34,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      })
+    );
+    glow.rotation.x = -Math.PI / 2;
+    glow.position.copy(base).setY(0.035);
+    bottomSpotGroup.add(glow);
+    bottomSpots.push({ spot, glow, baseIntensity: spot.intensity, baseOpacity: glow.material.opacity, phase: index * 1.7 });
+  });
+}
+
 /* ═══════════════════════════════════════════════════════════════
    GROUND PLANE
 ═══════════════════════════════════════════════════════════════ */
@@ -803,7 +885,7 @@ const groundGeo = new THREE.PlaneGeometry(300, 800, 1, 1);
 const groundMat = new THREE.MeshLambertMaterial({ color: THEMES.day.grassColor });
 const ground    = new THREE.Mesh(groundGeo, groundMat);
 ground.rotation.x = -Math.PI / 2;
-ground.position.y = -0.02;
+ground.position.y = 0;
 ground.position.z = -200;
 ground.receiveShadow = true;
 scene.add(ground);
@@ -815,6 +897,8 @@ function buildRoad() {
   const RW   = CFG.roadWidth / 2;
   const pts  = roadSpline.getPoints(600);
   const verts = [], indices = [], uvs = [];
+  const bedVerts = [], bedIndices = [], bedUvs = [];
+  const bedRW = RW + 1.65;
 
   for (let i = 0; i < pts.length; i++) {
     const t  = i / (pts.length - 1);
@@ -824,16 +908,33 @@ function buildRoad() {
       : pts[i].clone().sub(pts[i-1]).normalize();
     const right = new THREE.Vector3().crossVectors(tangent, new THREE.Vector3(0,1,0)).normalize();
 
-    verts.push(pt.x - right.x * RW, 0.01, pt.z - right.z * RW);
-    verts.push(pt.x + right.x * RW, 0.01, pt.z + right.z * RW);
+    bedVerts.push(pt.x - right.x * bedRW, 0.001, pt.z - right.z * bedRW);
+    bedVerts.push(pt.x + right.x * bedRW, 0.001, pt.z + right.z * bedRW);
+    bedUvs.push(0, t * 40);
+    bedUvs.push(1, t * 40);
+
+    verts.push(pt.x - right.x * RW, 0.012, pt.z - right.z * RW);
+    verts.push(pt.x + right.x * RW, 0.012, pt.z + right.z * RW);
     uvs.push(0, t * 40);
     uvs.push(1, t * 40);
 
     if (i < pts.length - 1) {
       const b = i * 2;
       indices.push(b, b+1, b+2, b+1, b+3, b+2);
+      bedIndices.push(b, b+1, b+2, b+1, b+3, b+2);
     }
   }
+
+  const bedGeo = new THREE.BufferGeometry();
+  bedGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(bedVerts), 3));
+  bedGeo.setAttribute('uv',       new THREE.BufferAttribute(new Float32Array(bedUvs), 2));
+  bedGeo.setIndex(bedIndices);
+  bedGeo.computeVertexNormals();
+
+  const bedMat = new THREE.MeshLambertMaterial({ color: 0x170006 });
+  const bedMesh = new THREE.Mesh(bedGeo, bedMat);
+  bedMesh.receiveShadow = true;
+  scene.add(bedMesh);
 
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(verts), 3));
@@ -849,7 +950,7 @@ function buildRoad() {
   /* Dashed center line */
   const dashPts = [];
   for (let i = 0; i < pts.length; i++) {
-    if (Math.floor(i * 0.15) % 2 === 0) dashPts.push(pts[i].clone().setY(0.03));
+    if (Math.floor(i * 0.15) % 2 === 0) dashPts.push(pts[i].clone().setY(0.022));
   }
   if (dashPts.length > 1) {
     const dGeo = new THREE.BufferGeometry().setFromPoints(dashPts);
@@ -864,7 +965,7 @@ function buildRoad() {
         ? pts[i+1].clone().sub(pt).normalize()
         : pts[i].clone().sub(pts[i-1]).normalize();
       const right = new THREE.Vector3().crossVectors(tangent, new THREE.Vector3(0,1,0)).normalize();
-      return pt.clone().add(right.multiplyScalar(side * RW * 0.98)).setY(0.025);
+      return pt.clone().add(right.multiplyScalar(side * RW * 0.98)).setY(0.02);
     });
     const eGeo = new THREE.BufferGeometry().setFromPoints(edgePts);
     const eMat = new THREE.LineBasicMaterial({ color: 0x8b000d, transparent: true, opacity: 0.78, linewidth: 1 });
@@ -1077,6 +1178,8 @@ buildSigns();
 ═══════════════════════════════════════════════════════════════ */
 const deadEndGroup = new THREE.Group();
 scene.add(deadEndGroup);
+const deadEndCenter = new THREE.Vector3(0, 2.8, -210);
+let deadEndAngle = 0;
 
 function buildDeadEnd() {
   while (deadEndGroup.children.length) {
@@ -1091,6 +1194,9 @@ function buildDeadEnd() {
   const tN   = roadSpline.getPoint(Math.min(tEnd + 0.001, 1));
   const tan  = tN.clone().sub(pos).normalize();
   const angle= Math.atan2(tan.x, tan.z);
+  const wallCenter = pos.clone().addScaledVector(tan, 4);
+  deadEndCenter.copy(wallCenter).setY(2.8);
+  deadEndAngle = angle;
 
   /* Wall */
   const wallGeo = new THREE.BoxGeometry(10, 5, 0.4);
@@ -1115,7 +1221,7 @@ function buildDeadEnd() {
   const wall    = new THREE.Mesh(wallGeo, wallMat);
   wall.castShadow = true;
   wall.receiveShadow = true;
-  wall.position.set(pos.x, 2.5, pos.z);
+  wall.position.set(wallCenter.x, 2.5, wallCenter.z);
   wall.rotation.y = angle;
 
   /* Barricade stripes */
@@ -1128,6 +1234,7 @@ function buildDeadEnd() {
   }
 
   deadEndGroup.add(wall);
+  buildBottomSpotlights(wall.position, angle);
 }
 buildDeadEnd();
 
@@ -1200,6 +1307,11 @@ function updateRoadProgress(progress) {
   const camPos = roadSpline.getPoint(camT);
   const lookT  = Math.min(camT + 0.015, 1);
   const lookAt = roadSpline.getPoint(lookT);
+  if (scrollProgress > 0.91) {
+    const endBlend = Math.min(1, (scrollProgress - 0.91) / 0.08);
+    lookAt.x += (deadEndCenter.x - lookAt.x) * endBlend * 0.72;
+    lookAt.z += (deadEndCenter.z - lookAt.z) * endBlend * 0.72;
+  }
 
   camera.position.set(camPos.x, CFG.cameraHeight, camPos.z);
   camera.lookAt(lookAt.x, CFG.cameraHeight * 0.5, lookAt.z);
@@ -1438,6 +1550,12 @@ function animate() {
       star.mat.opacity = 0;
       star.sprite.visible = false;
     }
+  });
+
+  bottomSpots.forEach(item => {
+    const pulse = 0.82 + Math.sin(elapsed * 1.6 + item.phase) * 0.18;
+    item.glow.material.opacity = item.baseOpacity * pulse;
+    item.spot.intensity = item.baseIntensity * (0.85 + pulse * 0.28);
   });
 
   /* Sign boards subtle breathe (scale y) */
