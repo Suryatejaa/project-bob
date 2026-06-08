@@ -14,4 +14,6 @@ Add one image per roadmap milestone:
 12.png - Legacy Beyond Stardom
 13.png - Vaaranasi Anticipation
 
+deadend.png - Image shown on the dead-end wall
+
 Use PNG files with these exact names. Square or wide images both work; the roadmap crops them to fit the milestone sign and tooltip.

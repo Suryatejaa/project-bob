@@ -257,15 +257,16 @@
     opacity: 0;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     flex-direction: column;
     gap: 12px;
+    padding: 0 clamp(20px, 5vw, 80px) clamp(46px, 9vh, 108px);
     transition: opacity 0.8s ease;
   }
   #deadend-overlay.visible { opacity: 1; pointer-events: all; }
   .deadend-text {
     font-family: 'Playfair Display', serif;
-    font-size: clamp(42px, 7vw, 112px);
+    font-size: clamp(34px, 6vw, 86px);
     color: var(--blood-bright);
     text-align: center;
     line-height: 0.85;
@@ -395,6 +396,7 @@
 ═══════════════════════════════════════════════════════════════ */
 const ROADMAP_IMAGE_BASE = './assets/roadmap/';
 const roadmapImage = (index) => `${ROADMAP_IMAGE_BASE}${String(index + 1).padStart(2, '0')}.png`;
+const DEAD_END_IMAGE = `${ROADMAP_IMAGE_BASE}deadend.png`;
 
 const MILESTONES = [
   { year: "1975", title: "Born Into Cinema", desc: "Mahesh Babu arrives as Krishna garu's son, carrying cinema in the bloodline before the screen even begins.", image: roadmapImage(0) },
@@ -1093,56 +1095,28 @@ function buildDeadEnd() {
   /* Wall */
   const wallGeo = new THREE.BoxGeometry(10, 5, 0.4);
   const wallMat = new THREE.MeshLambertMaterial({ color: isNight ? 0x080003 : 0x160003 });
+  new THREE.TextureLoader().load(
+    DEAD_END_IMAGE,
+    texture => {
+      texture.encoding = THREE.sRGBEncoding;
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      wallMat.map = texture;
+      wallMat.color.set(0xffffff);
+      wallMat.needsUpdate = true;
+    },
+    undefined,
+    () => {
+      wallMat.map = null;
+      wallMat.color.set(isNight ? 0x080003 : 0x160003);
+      wallMat.needsUpdate = true;
+    }
+  );
   const wall    = new THREE.Mesh(wallGeo, wallMat);
   wall.castShadow = true;
   wall.receiveShadow = true;
   wall.position.set(pos.x, 2.5, pos.z);
   wall.rotation.y = angle;
-
-  /* DEAD END sign on wall */
-  const signCv  = document.createElement('canvas');
-  signCv.width  = 512; signCv.height = 160;
-  const sCtx    = signCv.getContext('2d');
-  sCtx.fillStyle= isNight ? '#b50812' : '#ff2638';
-  roundRect(sCtx, 4, 4, 504, 152, 12); sCtx.fill();
-  sCtx.fillStyle= '#fff';
-  sCtx.font     = 'bold 58px DM Mono, monospace';
-  sCtx.textAlign= 'center';
-  sCtx.fillText('TO BE CONTINUED', 256, 98);
-  const signTex = new THREE.CanvasTexture(signCv);
-  const deSignGeo = new THREE.PlaneGeometry(2.8, 0.88);
-  const deSignMat = new THREE.MeshBasicMaterial({ map: signTex, transparent: true });
-  const deSign    = new THREE.Mesh(deSignGeo, deSignMat);
-  deSign.position.set(0, 1.5, 0.25);
-  wall.add(deSign);
-
-  /* Image placeholder on wall */
-  const imgGeo = new THREE.PlaneGeometry(3.2, 2.2);
-  const imgMat = new THREE.MeshBasicMaterial({ color: isNight ? 0x060002 : 0x200004, transparent: true, opacity: 0.9 });
-  const imgP   = new THREE.Mesh(imgGeo, imgMat);
-  imgP.position.set(0, 3.6, 0.25);
-  /* Dashed gold border */
-  const eGeo = new THREE.EdgesGeometry(imgGeo);
-  const eMat = new THREE.LineBasicMaterial({ color: 0xff2638 });
-  imgP.add(new THREE.LineSegments(eGeo, eMat));
-  wall.add(imgP);
-
-  /* Label above image */
-  const lblCv  = document.createElement('canvas');
-  lblCv.width  = 512; lblCv.height = 80;
-  const lCtx   = lblCv.getContext('2d');
-  lCtx.fillStyle = 'rgba(0,0,0,0)';
-  lCtx.clearRect(0,0,512,80);
-  lCtx.fillStyle = '#ff2638';
-  lCtx.font     = 'italic 32px Playfair Display, serif';
-  lCtx.textAlign= 'center';
-  lCtx.fillText('[ IMAGE PLACEHOLDER ]', 256, 48);
-  const lblTex = new THREE.CanvasTexture(lblCv);
-  const lblGeo = new THREE.PlaneGeometry(3.2, 0.5);
-  const lblMat = new THREE.MeshBasicMaterial({ map: lblTex, transparent: true });
-  const lbl    = new THREE.Mesh(lblGeo, lblMat);
-  lbl.position.set(0, 3.6, 0.26);
-  wall.add(lbl);
 
   /* Barricade stripes */
   for (let b = -2; b <= 2; b += 2) {
