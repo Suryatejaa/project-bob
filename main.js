@@ -19,6 +19,7 @@ async function init() {
     state.data = await response.json();
     renderSite(state.data);
     setupSmoothScroll();
+    setupRoadMapBridge();
     setupCursor();
     setupInteractions();
     setupAnimations();
@@ -33,10 +34,8 @@ function renderSite(data) {
   app.innerHTML = `
     ${renderHero(data)}
     ${renderHexSphereChapter(data.chapters[1])}
-    ${renderTimeline(data.timeline)}
+    ${renderRoadMapSection()}
     ${renderPersonality(data)}
-    ${renderChapter(data.chapters[2])}
-    ${renderFilms(data.films)}
     ${renderStats(data.stats)}
     ${renderDialogues(data.dialogues)}
     ${renderPhilanthropy(data.philanthropy)}
@@ -45,12 +44,12 @@ function renderSite(data) {
 }
 
 function renderHero(data) {
-  const media = data.meta.hero_video
+  const media = data.meta.hero_video1
     ? `
       <video autoplay muted loop playsinline poster="${data.meta.hero_image}">
         ${
-          data.meta.hero_video_mobile
-            ? `<source media="(max-width: 767px)" src="${data.meta.hero_video_mobile}" />`
+          data.meta.hero_image_mobile
+            ? `<source media="(max-width: 767px)" src="${data.meta.hero_image_mobile}" />`
             : ""
         }
         <source src="${data.meta.hero_video}" />
@@ -110,6 +109,26 @@ function renderHexSphereChapter(chapter) {
           title="Interactive Mahesh Babu fan memory sphere"
           loading="lazy"
           data-hex-frame
+        ></iframe>
+      </div>
+    </section>
+  `;
+}
+
+function renderRoadMapSection() {
+  return `
+    <section class="roadmap-section" data-roadmap-section>
+      <div class="roadmap-sticky">
+        <div class="roadmap-chapter-copy">
+          <div class="kicker">Chapter 03</div>
+          <h2>The Road</h2>
+          <p>Milestones, achievements, charity, and the legacy beyond the theatre screen.</p>
+        </div>
+        <iframe
+          src="./mb_road.html?embed=1"
+          title="Mahesh Babu journey roadmap"
+          loading="lazy"
+          data-roadmap-frame
         ></iframe>
       </div>
     </section>
@@ -322,6 +341,34 @@ function setupSmoothScroll() {
     gsap.ticker.add((time) => state.lenis.raf(time * 1000));
     gsap.ticker.lagSmoothing(0);
   }
+}
+
+function setupRoadMapBridge() {
+  const section = document.querySelector("[data-roadmap-section]");
+  const frame = document.querySelector("[data-roadmap-frame]");
+  if (!section || !frame) return;
+
+  let ticking = false;
+
+  function syncRoadMap() {
+    ticking = false;
+    const rect = section.getBoundingClientRect();
+    const scrollable = Math.max(1, section.offsetHeight - window.innerHeight);
+    const progress = Math.min(1, Math.max(0, -rect.top / scrollable));
+    frame.contentWindow?.postMessage({ type: "road-progress", progress }, window.location.origin);
+  }
+
+  function requestSync() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(syncRoadMap);
+  }
+
+  frame.addEventListener("load", requestSync);
+  window.addEventListener("scroll", requestSync, { passive: true });
+  window.addEventListener("resize", requestSync);
+  if (state.lenis) state.lenis.on("scroll", requestSync);
+  requestSync();
 }
 
 function setupCursor() {

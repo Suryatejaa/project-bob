@@ -438,6 +438,57 @@ video {
   width: 100%;
 }
 
+.roadmap-section {
+  background: #000;
+  min-height: 960vh;
+  padding: 0;
+  position: relative;
+}
+
+.roadmap-sticky {
+  height: 100vh;
+  overflow: hidden;
+  position: sticky;
+  top: 0;
+}
+
+.roadmap-chapter-copy {
+  left: var(--section-padding-x);
+  max-width: min(760px, calc(100vw - var(--section-padding-x) * 2));
+  pointer-events: none;
+  position: absolute;
+  top: clamp(28px, 5vw, 64px);
+  z-index: 3;
+}
+
+.roadmap-chapter-copy h2 {
+  color: var(--blood-bright);
+  font-size: clamp(58px, 9vw, 132px);
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 0.78;
+  margin: 8px 0 16px;
+  text-shadow:
+    5px 5px 0 #050505,
+    0 0 34px rgba(255, 38, 56, 0.32);
+  text-transform: uppercase;
+}
+
+.roadmap-chapter-copy p {
+  color: rgba(244, 240, 230, 0.76);
+  font-size: clamp(18px, 2vw, 28px);
+  line-height: 1.2;
+  margin: 0;
+  max-width: 680px;
+}
+
+.roadmap-sticky iframe {
+  border: 0;
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
 .timeline-section {
   background: var(--black-soft);
   padding-bottom: 0;
@@ -1076,6 +1127,20 @@ video {
     border-right: 0;
     height: 74svh;
     min-height: 560px;
+  }
+
+  .roadmap-chapter-copy {
+    top: 28px;
+  }
+
+  .roadmap-chapter-copy h2 {
+    font-size: clamp(54px, 17vw, 84px);
+    margin-bottom: 12px;
+  }
+
+  .roadmap-chapter-copy p {
+    font-size: clamp(16px, 4.8vw, 22px);
+    max-width: 330px;
   }
 
   .timeline-section {

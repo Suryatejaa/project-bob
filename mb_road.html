@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mahesh Babu — The Journey</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Mono:wght@300;400&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #EF9F27;
+    --gold-deep: #BA7517;
+    --cream: #F4F0E6;
+    --black: #0A0A0A;
+    --blood: #b50812;
+    --blood-bright: #ff2638;
+    --blood-dark: #260004;
+    --blood-glow: rgba(255, 38, 56, 0.32);
+    --panel: rgba(5, 0, 4, 0.82);
+  }
+
+  body {
+    background:
+      radial-gradient(circle at 48% 18%, rgba(255, 38, 56, 0.08), transparent 34vw),
+      linear-gradient(180deg, #030303, #0a0103 46%, #050505);
+    color: var(--cream);
+    overflow-x: hidden;
+    font-family: 'DM Mono', monospace;
+  }
+
+  body.is-embedded-road {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ─── MODULE WRAPPER ─────────────────────────────── */
+  #road-module {
+    position: relative;
+    width: 100%;
+    /* Height set by JS based on milestone count */
+  }
+
+  #road-canvas-wrapper {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    background:
+      radial-gradient(circle at 50% 42%, rgba(255, 38, 56, 0.16), transparent 42vw),
+      #030303;
+    overflow: hidden;
+  }
+
+  #road-canvas-wrapper::before,
+  #road-canvas-wrapper::after {
+    content: "";
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
+    z-index: 20;
+  }
+
+  #road-canvas-wrapper::before {
+    background:
+      linear-gradient(90deg, rgba(255, 38, 56, 0.22), transparent 17%, transparent 83%, rgba(255, 38, 56, 0.18)),
+      radial-gradient(circle at 50% 45%, transparent 32%, rgba(0, 0, 0, 0.5) 100%);
+    opacity: 0.9;
+  }
+
+  #road-canvas-wrapper::after {
+    animation: scanDrift 2.2s linear infinite;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0, rgba(255,255,255,0.035) 1px, transparent 1px, transparent 5px);
+    mix-blend-mode: overlay;
+    opacity: 0.18;
+  }
+
+  #three-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ─── TOOLTIP ─────────────────────────────────────── */
+  #tooltip {
+    position: absolute;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    max-width: 220px;
+  }
+  #tooltip.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .tooltip-inner {
+    background:
+      linear-gradient(135deg, rgba(255, 38, 56, 0.16), transparent 38%),
+      var(--panel);
+    border: 1px solid rgba(255, 38, 56, 0.62);
+    border-radius: 0;
+    box-shadow:
+      0 0 36px rgba(255, 38, 56, 0.18),
+      inset 0 0 24px rgba(255, 38, 56, 0.08);
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+    padding: 14px 15px;
+    backdrop-filter: blur(10px);
+  }
+  .tooltip-year {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--blood-bright);
+    letter-spacing: 0.2em;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+  .tooltip-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--cream);
+    line-height: 1.05;
+    margin-bottom: 6px;
+    text-shadow: 2px 2px 0 rgba(255, 38, 56, 0.38);
+  }
+  .tooltip-desc {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: rgba(244,240,230,0.68);
+    line-height: 1.5;
+  }
+  .tooltip-img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 0;
+    margin-bottom: 8px;
+    background: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+  .tooltip-img-placeholder {
+    width: 100%;
+    height: 100px;
+    border-radius: 5px;
+    margin-bottom: 8px;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(255, 38, 56, 0.18), transparent 56%),
+      #090002;
+    border: 1px solid rgba(255, 38, 56, 0.28);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: rgba(255, 38, 56, 0.52);
+    letter-spacing: 0.1em;
+  }
+  .tooltip-arrow {
+    width: 10px;
+    height: 10px;
+    background: rgba(8,0,4,0.92);
+    border-left: 1px solid rgba(255, 38, 56, 0.62);
+    border-bottom: 1px solid rgba(255, 38, 56, 0.62);
+    transform: rotate(-45deg);
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    margin-left: -5px;
+  }
+
+  /* ─── THEME TOGGLE ────────────────────────────────── */
+  #theme-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 200;
+    background:
+      linear-gradient(135deg, rgba(255, 38, 56, 0.15), transparent 48%),
+      rgba(3,0,2,0.72);
+    border: 1px solid rgba(255,38,56,0.48);
+    border-radius: 0;
+    box-shadow: 0 0 24px rgba(255, 38, 56, 0.12);
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+    padding: 9px 15px;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: rgba(244,240,230,0.84);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    user-select: none;
+  }
+  #theme-toggle:hover {
+    background: rgba(255,38,56,0.18);
+    border-color: var(--blood-bright);
+    color: #fff;
+  }
+  #theme-icon {
+    background: var(--blood-bright);
+    box-shadow: 0 0 16px rgba(255, 38, 56, 0.42);
+    display: inline-block;
+    height: 8px;
+    width: 8px;
+  }
+
+  /* ─── PROGRESS BAR ────────────────────────────────── */
+  #road-progress {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .progress-track {
+    width: clamp(120px, 30vw, 240px);
+    height: 2px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    box-shadow: 0 0 18px rgba(255, 38, 56, 0.1);
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--blood), var(--blood-bright), var(--cream));
+    border-radius: 2px;
+    box-shadow: 0 0 18px var(--blood-glow);
+    transition: width 0.1s linear;
+  }
+  .progress-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: rgba(244,240,230,0.58);
+    letter-spacing: 0.18em;
+    white-space: nowrap;
+  }
+
+  /* ─── DEAD END OVERLAY ───────────────────────────── */
+  #deadend-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 150;
+    pointer-events: none;
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+    transition: opacity 0.8s ease;
+  }
+  #deadend-overlay.visible { opacity: 1; pointer-events: all; }
+  .deadend-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(42px, 7vw, 112px);
+    color: var(--blood-bright);
+    text-align: center;
+    line-height: 0.85;
+    text-shadow:
+      5px 5px 0 #050505,
+      0 0 46px rgba(255, 38, 56, 0.42);
+    text-transform: uppercase;
+  }
+  .deadend-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: rgba(244,240,230,0.62);
+    letter-spacing: 0.22em;
+    text-align: center;
+  }
+  .scroll-hint {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    animation: bounce 1.5s ease-in-out infinite;
+    opacity: 0;
+    transition: opacity 1s ease 1.5s;
+  }
+  .scroll-hint.show { opacity: 1; }
+  .scroll-hint span {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--blood-bright);
+    font-family: 'DM Mono', monospace;
+  }
+  .scroll-hint svg {
+    filter: drop-shadow(0 0 10px rgba(255, 38, 56, 0.45));
+    transform: rotate(180deg);
+  }
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  @keyframes scanDrift {
+    from { transform: translateY(0); }
+    to { transform: translateY(10px); }
+  }
+
+  /* ─── MILESTONE LABEL (3D space) ─────────────────── */
+  .milestone-label {
+    position: absolute;
+    pointer-events: none;
+    z-index: 50;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .milestone-label.show { opacity: 1; }
+
+  /* ─── RESPONSIVE ──────────────────────────────────── */
+  @media (max-width: 600px) {
+    #theme-toggle { top: 12px; right: 12px; padding: 6px 12px; }
+    #tooltip { max-width: 180px; }
+    #road-progress {
+      bottom: 18px;
+      gap: 8px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════
+     MODULE: Mahesh Babu Road of Milestones
+     Drop this entire #road-module div into your page.
+     Adjust height via JS config below.
+════════════════════════════════════════════════════ -->
+<div id="road-module">
+
+  <div id="road-canvas-wrapper">
+    <canvas id="three-canvas"></canvas>
+
+    <!-- Theme Toggle -->
+    <div id="theme-toggle" onclick="toggleTheme()">
+      <span id="theme-icon"></span>
+      <span id="theme-label">BLOOD MODE</span>
+    </div>
+
+    <!-- Tooltip -->
+    <div id="tooltip">
+      <div class="tooltip-inner">
+        <div class="tooltip-img-placeholder" id="tooltip-img">[ IMAGE PLACEHOLDER ]</div>
+        <div class="tooltip-year" id="tooltip-year">1975</div>
+        <div class="tooltip-title" id="tooltip-title">Milestone</div>
+        <div class="tooltip-desc" id="tooltip-desc">Description here</div>
+        <div class="tooltip-arrow"></div>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div id="road-progress">
+      <div class="progress-label" id="progress-milestone">START</div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="progress-label" id="progress-pct">0%</div>
+    </div>
+
+    <!-- Dead End Overlay -->
+    <div id="deadend-overlay">
+      <div class="deadend-text">The Impact Continues</div>
+      <div class="deadend-sub">STAR POWER · SERVICE · LEGACY</div>
+      <div class="scroll-hint" id="scroll-hint">
+        <span>SCROLL TO CONTINUE</span>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 2L8 14M8 14L3 9M8 14L13 9" stroke="#ff2638" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+
+  </div><!-- end sticky wrapper -->
+</div><!-- end road-module -->
+
+
+<!-- ══════════════════════════════════════════════════ THREE.JS ══ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   MILESTONE DATA
+   Add images as ./assets/roadmap/01.png ... ./assets/roadmap/13.png
+═══════════════════════════════════════════════════════════════ */
+const ROADMAP_IMAGE_BASE = './assets/roadmap/';
+const roadmapImage = (index) => `${ROADMAP_IMAGE_BASE}${String(index + 1).padStart(2, '0')}.png`;
+
+const MILESTONES = [
+  { year: "1975", title: "Born Into Cinema", desc: "Mahesh Babu arrives as Krishna garu's son, carrying cinema in the bloodline before the screen even begins.", image: roadmapImage(0) },
+  { year: "1979", title: "First Screen Step", desc: "A child artist debut begins the journey early, long before the superstar image is formed.", image: roadmapImage(1) },
+  { year: "1999", title: "Lead Hero Arrival", desc: "Raja Kumarudu introduces him as a leading man and wins Best Male Debut recognition.", image: roadmapImage(2) },
+  { year: "2003", title: "Star Power Confirmed", desc: "Okkadu pushes him into a bigger league, earning major Best Actor recognition and mass credibility.", image: roadmapImage(3) },
+  { year: "2006", title: "Industry Phenomenon", desc: "Pokiri becomes a cultural blast, turning attitude, dialogue, and box-office force into a new standard.", image: roadmapImage(4) },
+  { year: "2011", title: "Commercial Peak", desc: "Dookudu proves his command over family crowds, comedy timing, and large-scale theatrical success.", image: roadmapImage(5) },
+  { year: "2015", title: "Village Adoption Spark", desc: "The Srimanthudu wave turns giving back into a public conversation, inspiring adoption of Burripalem and Siddhapuram.", image: roadmapImage(6) },
+  { year: "2016", title: "Healing Little Hearts", desc: "His support for pediatric heart care becomes one of the most meaningful parts of his public legacy.", image: roadmapImage(7) },
+  { year: "2018", title: "Responsibility Persona", desc: "Bharat Ane Nenu strengthens the image of dignity, social responsibility, and calm leadership.", image: roadmapImage(8) },
+  { year: "2019", title: "25th Film Milestone", desc: "Maharshi marks his 25th film and carries national-level recognition for wholesome popular cinema.", image: roadmapImage(9) },
+  { year: "2019", title: "Mahesh Babu Foundation", desc: "A focused platform for healthcare support, child welfare, and interventions for families in need.", image: roadmapImage(10) },
+  { year: "2020s", title: "Legacy Beyond Stardom", desc: "Box-office scale, awards, discipline, family image, and charity work merge into something bigger than fandom.", image: roadmapImage(11) },
+  { year: "2026", title: "Vaaranasi Anticipation", desc: "The SSR-SSMB chapter stands ahead as the most anticipated future milestone in this fan-made journey.", image: roadmapImage(12) },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   CONFIG
+═══════════════════════════════════════════════════════════════ */
+const CFG = {
+  roadScrollMultiplier: 1.8,   // how much scroll distance per milestone
+  cameraHeight: 2.2,
+  cameraBack: 0,
+  segmentsPerMilestone: 18,
+  roadWidth: 6,
+  signHeight: 3.2,
+  signOffset: 4.8,             // distance from road center
+  curveAmplitude: 11,          // how much the road curves L/R
+};
+
+const IS_EMBEDDED_ROAD = new URLSearchParams(window.location.search).get('embed') === '1';
+if (IS_EMBEDDED_ROAD) document.body.classList.add('is-embedded-road');
+
+/* Module scroll height */
+const MODULE_SCROLL_HEIGHT = IS_EMBEDDED_ROAD
+  ? window.innerHeight
+  : window.innerHeight * (MILESTONES.length * CFG.roadScrollMultiplier + 3);
+document.getElementById('road-module').style.height = MODULE_SCROLL_HEIGHT + 'px';
+
+/* ═══════════════════════════════════════════════════════════════
+   THEME STATE
+═══════════════════════════════════════════════════════════════ */
+let isNight = false;
+
+const THEMES = {
+  day: {
+    skyTop:    new THREE.Color(0x050103),
+    skyMid:    new THREE.Color(0x190006),
+    skyHor:    new THREE.Color(0x4a0109),
+    fogColor:  new THREE.Color(0x190006),
+    fogNear:   24, fogFar: 120,
+    ambientInt: 0.58,
+    sunInt:    0.42,
+    roadColor: 0x080607,
+    grassColor:0x090203,
+    treeTrunk: 0x260004,
+    treeTop:   0x140003,
+    signPost:  0x5f0710,
+    signBoard: 0x120003,
+    signText:  0xff2638,
+  },
+  night: {
+    skyTop:    new THREE.Color(0x000000),
+    skyMid:    new THREE.Color(0x070006),
+    skyHor:    new THREE.Color(0x1f0005),
+    fogColor:  new THREE.Color(0x080003),
+    fogNear:   18, fogFar: 92,
+    ambientInt: 0.24,
+    sunInt:    0.08,
+    roadColor: 0x020202,
+    grassColor:0x040001,
+    treeTrunk: 0x150003,
+    treeTop:   0x090001,
+    signPost:  0x42060b,
+    signBoard: 0x060002,
+    signText:  0xf4f0e6,
+  }
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   THREE.JS SETUP
+═══════════════════════════════════════════════════════════════ */
+const canvas  = document.getElementById('three-canvas');
+const wrapper = document.getElementById('road-canvas-wrapper');
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type    = THREE.PCFSoftShadowMap;
+renderer.outputEncoding    = THREE.sRGBEncoding;
+
+const scene  = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(62, 1, 0.1, 500);
+
+function resizeRenderer() {
+  const w = wrapper.clientWidth;
+  const h = wrapper.clientHeight;
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+resizeRenderer();
+window.addEventListener('resize', () => { resizeRenderer(); buildStars(); });
+
+/* ═══════════════════════════════════════════════════════════════
+   SPLINE PATH (curly road)
+═══════════════════════════════════════════════════════════════ */
+const totalPoints = MILESTONES.length * CFG.segmentsPerMilestone + 40;
+const splinePoints = [];
+const A = CFG.curveAmplitude;
+
+for (let i = 0; i < totalPoints; i++) {
+  const t  = i / totalPoints;
+  const z  = -i * 2.4;
+  const x  = Math.sin(t * Math.PI * (MILESTONES.length * 0.55)) * A * (0.5 + t * 0.5);
+  splinePoints.push(new THREE.Vector3(x, 0, z));
+}
+
+const roadSpline = new THREE.CatmullRomCurve3(splinePoints, false, 'catmullrom', 0.4);
+
+/* Milestone positions along spline (t values) */
+const milestoneT = MILESTONES.map((_, i) => {
+  const base = 0.04;
+  const end  = 0.88;
+  return base + (i / (MILESTONES.length - 1)) * (end - base);
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   SKY & FOG
+═══════════════════════════════════════════════════════════════ */
+scene.background = THEMES.day.skyTop.clone();
+scene.fog = new THREE.Fog(THEMES.day.fogColor, THEMES.day.fogNear, THEMES.day.fogFar);
+
+/* Sky dome */
+const skyGeo = new THREE.SphereGeometry(240, 32, 16);
+skyGeo.scale(-1, 1, -1);
+const skyMat = new THREE.ShaderMaterial({
+  uniforms: {
+    uTopColor: { value: THEMES.day.skyTop.clone() },
+    uMidColor: { value: THEMES.day.skyMid.clone() },
+    uHorColor: { value: THEMES.day.skyHor.clone() },
+    uMix:      { value: 0.0 }, // 0=day, 1=night
+  },
+  vertexShader: `
+    varying vec3 vPos;
+    void main() {
+      vPos = position;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+    }
+  `,
+  fragmentShader: `
+    uniform vec3 uTopColor, uMidColor, uHorColor;
+    uniform float uMix;
+    varying vec3 vPos;
+    void main() {
+      float h = normalize(vPos).y;
+      vec3 col = mix(uHorColor, mix(uMidColor, uTopColor, smoothstep(0.0,0.6,h)), smoothstep(-0.05,0.3,h));
+      gl_FragColor = vec4(col, 1.0);
+    }
+  `,
+  side: THREE.BackSide,
+  depthWrite: false,
+});
+const skyMesh = new THREE.Mesh(skyGeo, skyMat);
+skyMesh.renderOrder = -1;
+scene.add(skyMesh);
+
+/* Sun */
+const sunGeo = new THREE.SphereGeometry(4, 16, 16);
+const sunMat = new THREE.MeshBasicMaterial({ color: 0xff2638 });
+const sunMesh = new THREE.Mesh(sunGeo, sunMat);
+sunMesh.position.set(60, 80, -150);
+scene.add(sunMesh);
+
+const moonGroup = new THREE.Group();
+const moonGeo = new THREE.SphereGeometry(7, 32, 24);
+const moonMat = new THREE.MeshBasicMaterial({ color: 0xf4f0e6 });
+const moonMesh = new THREE.Mesh(moonGeo, moonMat);
+const moonShadeGeo = new THREE.SphereGeometry(7.15, 32, 24);
+const moonShadeMat = new THREE.MeshBasicMaterial({ color: 0x050103, transparent: true, opacity: 0.78 });
+const moonShade = new THREE.Mesh(moonShadeGeo, moonShadeMat);
+moonShade.position.set(3.2, 0.8, 0.2);
+moonGroup.add(moonMesh, moonShade);
+moonGroup.position.set(-70, 64, -130);
+scene.add(moonGroup);
+
+/* ═══════════════════════════════════════════════════════════════
+   NORTHERN LIGHTS (Aurora Borealis) — shader planes
+═══════════════════════════════════════════════════════════════ */
+const auroraGroup = new THREE.Group();
+scene.add(auroraGroup);
+
+const auroraColors = [
+  [1.0, 0.05, 0.12],
+  [0.0, 0.85, 0.48],
+  [0.05, 0.42, 1.0],
+  [0.95, 0.88, 0.76],
+];
+
+const auroraShader = {
+  uniforms: {
+    uTime:    { value: 0 },
+    uColor:   { value: new THREE.Vector3(0, 0.9, 0.5) },
+    uOpacity: { value: 0.0 },
+  },
+  vertexShader: `
+    uniform float uTime;
+    varying vec2 vUv;
+    varying float vWave;
+    void main() {
+      vUv = uv;
+      float wave = sin(position.x * 0.12 + uTime * 0.7) * 6.0
+                 + sin(position.x * 0.05 + uTime * 0.4) * 10.0;
+      vec3 pos = position;
+      pos.y += wave * vUv.y;
+      vWave = wave;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(pos,1.0);
+    }
+  `,
+  fragmentShader: `
+    uniform vec3 uColor;
+    uniform float uOpacity;
+    varying vec2 vUv;
+    varying float vWave;
+    void main() {
+      float alpha = smoothstep(0.0, 0.3, vUv.y) * smoothstep(1.0, 0.5, vUv.y);
+      alpha *= smoothstep(0.0, 0.15, vUv.x) * smoothstep(1.0, 0.85, vUv.x);
+      alpha *= 0.6 + 0.4 * sin(vUv.x * 12.0 + vWave * 0.3);
+      gl_FragColor = vec4(uColor, alpha * uOpacity);
+    }
+  `,
+  transparent: true,
+  depthWrite:  false,
+  side: THREE.DoubleSide,
+};
+
+const auroraMeshes = [];
+for (let i = 0; i < 4; i++) {
+  const geo = new THREE.PlaneGeometry(320, 50, 80, 12);
+  const mat = new THREE.ShaderMaterial({
+    ...auroraShader,
+    uniforms: {
+      uTime:    { value: 0 },
+      uColor:   { value: new THREE.Vector3(...auroraColors[i]) },
+      uOpacity: { value: Math.max(0.04, 0.16 - i * 0.03) },
+    },
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(
+    (i - 1.5) * 60,
+    60 + i * 8,
+    -180 - i * 20
+  );
+  mesh.rotation.x = -0.12 - i * 0.04;
+  auroraGroup.add(mesh);
+  auroraMeshes.push(mesh);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   STARS
+═══════════════════════════════════════════════════════════════ */
+let starsMesh = null;
+function buildStars() {
+  if (starsMesh) { scene.remove(starsMesh); starsMesh.geometry.dispose(); starsMesh.material.dispose(); }
+  const count = 2600;
+  const pos   = new Float32Array(count * 3);
+  const colors = new Float32Array(count * 3);
+  const palette = [
+    new THREE.Color(0xfff4e6),
+    new THREE.Color(0xff3149),
+    new THREE.Color(0x5ee8ff),
+    new THREE.Color(0x87ffbd),
+    new THREE.Color(0xfac775),
+    new THREE.Color(0xa88cff),
+  ];
+  for (let i = 0; i < count; i++) {
+    const theta = Math.random() * Math.PI * 2;
+    const phi   = Math.acos(2 * Math.random() - 1) * 0.5; // upper hemisphere only
+    const r     = 220;
+    pos[i*3]   = r * Math.sin(phi) * Math.cos(theta);
+    pos[i*3+1] = Math.abs(r * Math.cos(phi)) + 10;
+    pos[i*3+2] = r * Math.sin(phi) * Math.sin(theta);
+    const c = palette[Math.floor(Math.random() * palette.length)];
+    const boost = 0.62 + Math.random() * 0.38;
+    colors[i*3] = c.r * boost;
+    colors[i*3+1] = c.g * boost;
+    colors[i*3+2] = c.b * boost;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const mat = new THREE.PointsMaterial({
+    size: 0.92,
+    transparent: true,
+    opacity: 0.78,
+    vertexColors: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+  starsMesh = new THREE.Points(geo, mat);
+  scene.add(starsMesh);
+}
+buildStars();
+
+function makeShootingStarTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 32;
+  const ctx = canvas.getContext('2d');
+  const grad = ctx.createLinearGradient(0, 16, 256, 16);
+  grad.addColorStop(0, 'rgba(255,255,255,0)');
+  grad.addColorStop(0.55, 'rgba(94,232,255,0.34)');
+  grad.addColorStop(0.84, 'rgba(255,49,73,0.75)');
+  grad.addColorStop(1, 'rgba(255,255,255,1)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 12, 256, 8);
+  const glow = ctx.createRadialGradient(230, 16, 0, 230, 16, 28);
+  glow.addColorStop(0, 'rgba(255,255,255,1)');
+  glow.addColorStop(0.42, 'rgba(135,255,189,0.72)');
+  glow.addColorStop(1, 'rgba(255,49,73,0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(202, 0, 56, 32);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.needsUpdate = true;
+  return tex;
+}
+
+function createShootingStar() {
+  const mat = new THREE.SpriteMaterial({
+    map: makeShootingStarTexture(),
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+  const sprite = new THREE.Sprite(mat);
+  sprite.visible = false;
+  scene.add(sprite);
+  return {
+    sprite,
+    mat,
+    active: false,
+    life: 0,
+    duration: 0.9,
+    start: new THREE.Vector3(),
+    end: new THREE.Vector3(),
+    baseScale: new THREE.Vector3(18, 2.1, 1),
+  };
+}
+
+const shootingStars = Array.from({ length: 10 }, createShootingStar);
+let nextShootingStarAt = 0.4;
+
+function launchShootingStar(star) {
+  const side = Math.random() > 0.5 ? 1 : -1;
+  const startX = camera.position.x + side * (34 + Math.random() * 26);
+  const startY = 42 + Math.random() * 34;
+  const startZ = camera.position.z - (58 + Math.random() * 70);
+  const travelX = -side * (42 + Math.random() * 28);
+  const travelY = -(10 + Math.random() * 13);
+  const travelZ = -(4 + Math.random() * 12);
+
+  star.start.set(startX, startY, startZ);
+  star.end.set(startX + travelX, startY + travelY, startZ + travelZ);
+  star.sprite.position.copy(star.start);
+  star.sprite.material.rotation = Math.atan2(travelY, travelX);
+  star.baseScale.set(18 + Math.random() * 7, 1.7 + Math.random() * 0.7, 1);
+  star.sprite.scale.copy(star.baseScale);
+  star.duration = 0.58 + Math.random() * 0.42;
+  star.life = 0;
+  star.active = true;
+  star.mat.opacity = 0;
+  star.sprite.visible = true;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LIGHTING
+═══════════════════════════════════════════════════════════════ */
+const ambientLight = new THREE.AmbientLight(0xffffff, THEMES.day.ambientInt);
+scene.add(ambientLight);
+
+const sunLight = new THREE.DirectionalLight(0xff9aa3, THEMES.day.sunInt);
+sunLight.position.set(80, 120, -60);
+sunLight.castShadow = true;
+sunLight.shadow.mapSize.set(1024, 1024);
+sunLight.shadow.camera.near   = 1;
+sunLight.shadow.camera.far    = 300;
+sunLight.shadow.camera.left   = -80;
+sunLight.shadow.camera.right  = 80;
+sunLight.shadow.camera.top    = 80;
+sunLight.shadow.camera.bottom = -80;
+scene.add(sunLight);
+
+/* Night streetlamp glow */
+const nightAmbient = new THREE.AmbientLight(0x3a0206, 0.0);
+scene.add(nightAmbient);
+
+/* ═══════════════════════════════════════════════════════════════
+   GROUND PLANE
+═══════════════════════════════════════════════════════════════ */
+const groundGeo = new THREE.PlaneGeometry(300, 800, 1, 1);
+const groundMat = new THREE.MeshLambertMaterial({ color: THEMES.day.grassColor });
+const ground    = new THREE.Mesh(groundGeo, groundMat);
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = -0.02;
+ground.position.z = -200;
+ground.receiveShadow = true;
+scene.add(ground);
+
+/* ═══════════════════════════════════════════════════════════════
+   ROAD MESH (ribbon along spline)
+═══════════════════════════════════════════════════════════════ */
+function buildRoad() {
+  const RW   = CFG.roadWidth / 2;
+  const pts  = roadSpline.getPoints(600);
+  const verts = [], indices = [], uvs = [];
+
+  for (let i = 0; i < pts.length; i++) {
+    const t  = i / (pts.length - 1);
+    const pt = pts[i];
+    const tangent = (i < pts.length - 1)
+      ? pts[i+1].clone().sub(pt).normalize()
+      : pts[i].clone().sub(pts[i-1]).normalize();
+    const right = new THREE.Vector3().crossVectors(tangent, new THREE.Vector3(0,1,0)).normalize();
+
+    verts.push(pt.x - right.x * RW, 0.01, pt.z - right.z * RW);
+    verts.push(pt.x + right.x * RW, 0.01, pt.z + right.z * RW);
+    uvs.push(0, t * 40);
+    uvs.push(1, t * 40);
+
+    if (i < pts.length - 1) {
+      const b = i * 2;
+      indices.push(b, b+1, b+2, b+1, b+3, b+2);
+    }
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(verts), 3));
+  geo.setAttribute('uv',       new THREE.BufferAttribute(new Float32Array(uvs), 2));
+  geo.setIndex(indices);
+  geo.computeVertexNormals();
+
+  const mat  = new THREE.MeshLambertMaterial({ color: THEMES.day.roadColor });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.receiveShadow = true;
+  scene.add(mesh);
+
+  /* Dashed center line */
+  const dashPts = [];
+  for (let i = 0; i < pts.length; i++) {
+    if (Math.floor(i * 0.15) % 2 === 0) dashPts.push(pts[i].clone().setY(0.03));
+  }
+  if (dashPts.length > 1) {
+    const dGeo = new THREE.BufferGeometry().setFromPoints(dashPts);
+    const dMat = new THREE.LineBasicMaterial({ color: 0xff2638, transparent: true, opacity: 0.72, linewidth: 1 });
+    scene.add(new THREE.Line(dGeo, dMat));
+  }
+
+  /* Road edges (white lines) */
+  for (const side of [-1, 1]) {
+    const edgePts = pts.map((pt, i) => {
+      const tangent = (i < pts.length - 1)
+        ? pts[i+1].clone().sub(pt).normalize()
+        : pts[i].clone().sub(pts[i-1]).normalize();
+      const right = new THREE.Vector3().crossVectors(tangent, new THREE.Vector3(0,1,0)).normalize();
+      return pt.clone().add(right.multiplyScalar(side * RW * 0.98)).setY(0.025);
+    });
+    const eGeo = new THREE.BufferGeometry().setFromPoints(edgePts);
+    const eMat = new THREE.LineBasicMaterial({ color: 0x8b000d, transparent: true, opacity: 0.78, linewidth: 1 });
+    scene.add(new THREE.Line(eGeo, eMat));
+  }
+
+  return mesh;
+}
+buildRoad();
+
+/* ═══════════════════════════════════════════════════════════════
+   SIGN BOARDS
+═══════════════════════════════════════════════════════════════ */
+const signGroup    = new THREE.Group();
+scene.add(signGroup);
+const signObjects  = []; // { group, milestoneIndex, worldPos, screenNear:bool }
+const SIGN_IMAGE_SLOT = { x: 318, y: 34, w: 154, h: 106 };
+
+function makeSignTexture(milestone, isNight) {
+  const W = 512, H = 256;
+  const cv  = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d');
+
+  const bg   = isNight ? '#050002' : '#120003';
+  const fg   = isNight ? '#f4f0e6' : '#ff2638';
+  const sub  = isNight ? 'rgba(244,240,230,0.58)' : 'rgba(244,240,230,0.66)';
+  const bdr  = isNight ? '#b50812' : '#ff2638';
+
+  /* Board bg */
+  const grad = ctx.createLinearGradient(0, 0, W, H);
+  grad.addColorStop(0, bg);
+  grad.addColorStop(0.56, '#050002');
+  grad.addColorStop(1, '#2a0007');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = grad;
+  ctx.fillRect(8, 8, W - 16, H - 16);
+
+  /* Border */
+  ctx.strokeStyle = bdr;
+  ctx.lineWidth = 5;
+  ctx.strokeRect(8, 8, W - 16, H - 16);
+  ctx.strokeStyle = 'rgba(244,240,230,0.32)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(20, 20, W - 40, H - 40);
+
+  const slot = SIGN_IMAGE_SLOT;
+  ctx.fillStyle = isNight ? '#060002' : '#250005';
+  ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
+  ctx.strokeStyle = bdr;
+  ctx.lineWidth = 3;
+  ctx.strokeRect(slot.x, slot.y, slot.w, slot.h);
+  ctx.strokeStyle = 'rgba(244,240,230,0.26)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(slot.x + 8, slot.y + 8, slot.w - 16, slot.h - 16);
+  ctx.fillStyle = isNight ? 'rgba(244,240,230,0.42)' : 'rgba(255,38,56,0.58)';
+  ctx.font = 'bold 14px DM Mono, monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('IMAGE', slot.x + slot.w / 2, slot.y + slot.h / 2 + 5);
+
+  /* Year */
+  ctx.fillStyle = fg;
+  ctx.font = 'bold 50px DM Mono, monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText(milestone.year, 28, 72);
+
+  /* Blood line */
+  ctx.strokeStyle = bdr;
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(28, 84); ctx.lineTo(slot.x - 18, 84); ctx.stroke();
+
+  /* Title */
+  ctx.fillStyle = fg;
+  ctx.font = 'bold 34px Playfair Display, serif';
+  ctx.textAlign = 'left';
+  const title = milestone.title.length > 15 ? milestone.title.slice(0,14)+'…' : milestone.title;
+  ctx.fillText(title, 28, 130);
+
+  /* Desc */
+  ctx.fillStyle = sub;
+  ctx.font = '22px DM Mono, monospace';
+  const words = milestone.desc.split(' ');
+  let line = ''; let y = 170;
+  const textMaxWidth = slot.x - 56;
+  for (const w of words) {
+    const test = line + w + ' ';
+    if (ctx.measureText(test).width > textMaxWidth && line !== '') {
+      ctx.fillText(line.trim(), 28, y); y += 28; line = w + ' ';
+      if (y > H - 10) break;
+    } else { line = test; }
+  }
+  if (y <= H - 10) ctx.fillText(line.trim(), 28, y);
+
+  return cv;
+}
+
+function drawImageIntoSignTexture(canvas, imageUrl, onUpdate) {
+  if (!imageUrl) return;
+  const img = new Image();
+  img.onload = () => {
+    const ctx = canvas.getContext('2d');
+    const slot = SIGN_IMAGE_SLOT;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(slot.x, slot.y, slot.w, slot.h);
+    ctx.clip();
+    const scale = Math.max(slot.w / img.width, slot.h / img.height);
+    const w = img.width * scale;
+    const h = img.height * scale;
+    ctx.drawImage(
+      img,
+      slot.x + (slot.w - w) / 2,
+      slot.y + (slot.h - h) / 2,
+      w,
+      h
+    );
+    const shade = ctx.createLinearGradient(slot.x, slot.y, slot.x, slot.y + slot.h);
+    shade.addColorStop(0, 'rgba(0,0,0,0)');
+    shade.addColorStop(1, 'rgba(0,0,0,0.28)');
+    ctx.fillStyle = shade;
+    ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
+    ctx.restore();
+    ctx.strokeStyle = '#ff2638';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(slot.x, slot.y, slot.w, slot.h);
+    ctx.strokeStyle = 'rgba(244,240,230,0.38)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(slot.x + 8, slot.y + 8, slot.w - 16, slot.h - 16);
+    onUpdate();
+  };
+  img.src = imageUrl;
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y);
+  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r);
+  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h);
+  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r);
+  ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
+}
+
+function buildSigns() {
+  /* Clear previous */
+  while (signGroup.children.length) {
+    const c = signGroup.children[0];
+    c.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) { if (o.material.map) o.material.map.dispose(); o.material.dispose(); } });
+    signGroup.remove(c);
+  }
+  signObjects.length = 0;
+
+  const T = THEMES[isNight ? 'night' : 'day'];
+
+  MILESTONES.forEach((ms, i) => {
+    const t     = milestoneT[i];
+    const pos   = roadSpline.getPoint(t);
+    const tNext = Math.min(t + 0.001, 1);
+    const tan   = roadSpline.getPoint(tNext).sub(pos).normalize();
+    const right = new THREE.Vector3().crossVectors(tan, new THREE.Vector3(0,1,0)).normalize();
+
+    const side  = (i % 2 === 0) ? 1 : -1;
+    const grp   = new THREE.Group();
+
+    /* POST */
+    const postGeo = new THREE.CylinderGeometry(0.08, 0.1, CFG.signHeight, 8);
+    const postMat = new THREE.MeshLambertMaterial({ color: T.signPost });
+    const post    = new THREE.Mesh(postGeo, postMat);
+    post.castShadow = true;
+    post.position.set(0, CFG.signHeight / 2, 0);
+    grp.add(post);
+
+    /* BOARD */
+    const boardW = 3.2, boardH = 1.6;
+    const boardGeo = new THREE.BoxGeometry(boardW, boardH, 0.12);
+    const signCanvas = makeSignTexture(ms, isNight);
+    const cvTex    = new THREE.CanvasTexture(signCanvas);
+    drawImageIntoSignTexture(signCanvas, ms.image, () => { cvTex.needsUpdate = true; });
+    const boardMat = new THREE.MeshLambertMaterial({ map: cvTex, color: 0xffffff });
+    const board    = new THREE.Mesh(boardGeo, boardMat);
+    board.castShadow = true;
+    board.position.set(side * boardW * 0.4, CFG.signHeight + boardH / 2 - 0.1, 0);
+    /* Face the camera direction roughly */
+    board.rotation.y = side * -0.3;
+    grp.add(board);
+
+    /* POSITION GROUP along road + offset */
+    grp.position.copy(pos);
+    grp.position.x += right.x * CFG.signOffset * side;
+    grp.position.z += right.z * CFG.signOffset * side;
+    grp.position.y  = 0;
+
+    /* Rotate group to face road direction */
+    const angle = Math.atan2(tan.x, tan.z);
+    grp.rotation.y = angle;
+
+    signGroup.add(grp);
+    signObjects.push({ group: grp, milestoneIndex: i, worldPos: grp.position.clone(), board });
+  });
+}
+buildSigns();
+
+/* ═══════════════════════════════════════════════════════════════
+   DEAD END WALL
+═══════════════════════════════════════════════════════════════ */
+const deadEndGroup = new THREE.Group();
+scene.add(deadEndGroup);
+
+function buildDeadEnd() {
+  while (deadEndGroup.children.length) {
+    const c = deadEndGroup.children[0];
+    c.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
+    deadEndGroup.remove(c);
+  }
+
+  const T   = THEMES[isNight ? 'night' : 'day'];
+  const tEnd = 0.94;
+  const pos  = roadSpline.getPoint(tEnd);
+  const tN   = roadSpline.getPoint(Math.min(tEnd + 0.001, 1));
+  const tan  = tN.clone().sub(pos).normalize();
+  const angle= Math.atan2(tan.x, tan.z);
+
+  /* Wall */
+  const wallGeo = new THREE.BoxGeometry(10, 5, 0.4);
+  const wallMat = new THREE.MeshLambertMaterial({ color: isNight ? 0x080003 : 0x160003 });
+  const wall    = new THREE.Mesh(wallGeo, wallMat);
+  wall.castShadow = true;
+  wall.receiveShadow = true;
+  wall.position.set(pos.x, 2.5, pos.z);
+  wall.rotation.y = angle;
+
+  /* DEAD END sign on wall */
+  const signCv  = document.createElement('canvas');
+  signCv.width  = 512; signCv.height = 160;
+  const sCtx    = signCv.getContext('2d');
+  sCtx.fillStyle= isNight ? '#b50812' : '#ff2638';
+  roundRect(sCtx, 4, 4, 504, 152, 12); sCtx.fill();
+  sCtx.fillStyle= '#fff';
+  sCtx.font     = 'bold 58px DM Mono, monospace';
+  sCtx.textAlign= 'center';
+  sCtx.fillText('TO BE CONTINUED', 256, 98);
+  const signTex = new THREE.CanvasTexture(signCv);
+  const deSignGeo = new THREE.PlaneGeometry(2.8, 0.88);
+  const deSignMat = new THREE.MeshBasicMaterial({ map: signTex, transparent: true });
+  const deSign    = new THREE.Mesh(deSignGeo, deSignMat);
+  deSign.position.set(0, 1.5, 0.25);
+  wall.add(deSign);
+
+  /* Image placeholder on wall */
+  const imgGeo = new THREE.PlaneGeometry(3.2, 2.2);
+  const imgMat = new THREE.MeshBasicMaterial({ color: isNight ? 0x060002 : 0x200004, transparent: true, opacity: 0.9 });
+  const imgP   = new THREE.Mesh(imgGeo, imgMat);
+  imgP.position.set(0, 3.6, 0.25);
+  /* Dashed gold border */
+  const eGeo = new THREE.EdgesGeometry(imgGeo);
+  const eMat = new THREE.LineBasicMaterial({ color: 0xff2638 });
+  imgP.add(new THREE.LineSegments(eGeo, eMat));
+  wall.add(imgP);
+
+  /* Label above image */
+  const lblCv  = document.createElement('canvas');
+  lblCv.width  = 512; lblCv.height = 80;
+  const lCtx   = lblCv.getContext('2d');
+  lCtx.fillStyle = 'rgba(0,0,0,0)';
+  lCtx.clearRect(0,0,512,80);
+  lCtx.fillStyle = '#ff2638';
+  lCtx.font     = 'italic 32px Playfair Display, serif';
+  lCtx.textAlign= 'center';
+  lCtx.fillText('[ IMAGE PLACEHOLDER ]', 256, 48);
+  const lblTex = new THREE.CanvasTexture(lblCv);
+  const lblGeo = new THREE.PlaneGeometry(3.2, 0.5);
+  const lblMat = new THREE.MeshBasicMaterial({ map: lblTex, transparent: true });
+  const lbl    = new THREE.Mesh(lblGeo, lblMat);
+  lbl.position.set(0, 3.6, 0.26);
+  wall.add(lbl);
+
+  /* Barricade stripes */
+  for (let b = -2; b <= 2; b += 2) {
+    const bGeo  = new THREE.BoxGeometry(0.25, 1.5, 0.3);
+    const bMat  = new THREE.MeshLambertMaterial({ color: 0xff2638 });
+    const bMesh = new THREE.Mesh(bGeo, bMat);
+    bMesh.position.set(b, 0.75, 0.35);
+    wall.add(bMesh);
+  }
+
+  deadEndGroup.add(wall);
+}
+buildDeadEnd();
+
+/* ═══════════════════════════════════════════════════════════════
+   TREES (decorative along roadside)
+═══════════════════════════════════════════════════════════════ */
+function buildTrees() {
+  const treeGroup = new THREE.Group();
+  scene.add(treeGroup);
+  const T = THEMES[isNight ? 'night' : 'day'];
+  const roadPts = roadSpline.getPoints(80);
+
+  for (let i = 2; i < roadPts.length - 4; i += 3) {
+    const pt  = roadPts[i];
+    const tan = (i < roadPts.length - 1)
+      ? roadPts[i+1].clone().sub(pt).normalize()
+      : roadPts[i].clone().sub(roadPts[i-1]).normalize();
+    const right = new THREE.Vector3().crossVectors(tan, new THREE.Vector3(0,1,0)).normalize();
+
+    for (const side of [-1, 1]) {
+      const dist  = 8 + Math.random() * 5;
+      const offX  = right.x * dist * side + (Math.random()-0.5) * 2;
+      const offZ  = right.z * dist * side + (Math.random()-0.5) * 2;
+      const h     = 3 + Math.random() * 3;
+
+      const trunkGeo  = new THREE.CylinderGeometry(0.12, 0.18, h, 6);
+      const trunkMat  = new THREE.MeshLambertMaterial({ color: T.treeTrunk });
+      const trunk     = new THREE.Mesh(trunkGeo, trunkMat);
+      trunk.castShadow= true;
+      trunk.position.set(pt.x + offX, h/2, pt.z + offZ);
+
+      const topGeo    = new THREE.ConeGeometry(1.2 + Math.random() * 0.6, h * 1.1, 7);
+      const topMat    = new THREE.MeshLambertMaterial({ color: T.treeTop });
+      const top       = new THREE.Mesh(topGeo, topMat);
+      top.castShadow  = true;
+      top.position.set(pt.x + offX, h + h * 0.5, pt.z + offZ);
+
+      treeGroup.add(trunk, top);
+    }
+  }
+  return treeGroup;
+}
+let treeGroup = buildTrees();
+
+/* ═══════════════════════════════════════════════════════════════
+   SCROLL LOGIC
+═══════════════════════════════════════════════════════════════ */
+let scrollProgress = 0;      // 0→1
+let deadEndReached = false;
+let lastScrollY    = 0;
+
+const tooltip    = document.getElementById('tooltip');
+const tYear      = document.getElementById('tooltip-year');
+const tTitle     = document.getElementById('tooltip-title');
+const tDesc      = document.getElementById('tooltip-desc');
+const tImg       = document.getElementById('tooltip-img');
+const progFill   = document.getElementById('progress-fill');
+const progPct    = document.getElementById('progress-pct');
+const progMs     = document.getElementById('progress-milestone');
+const deadOverlay= document.getElementById('deadend-overlay');
+const scrollHint = document.getElementById('scroll-hint');
+
+let activeTooltipSign = -1;
+
+function updateRoadProgress(progress) {
+  scrollProgress = Math.max(0, Math.min(1, progress));
+  /* Camera travel: t goes from 0.01 → 0.93 (before dead end) */
+  const camT = 0.01 + scrollProgress * 0.90;
+
+  const camPos = roadSpline.getPoint(camT);
+  const lookT  = Math.min(camT + 0.015, 1);
+  const lookAt = roadSpline.getPoint(lookT);
+
+  camera.position.set(camPos.x, CFG.cameraHeight, camPos.z);
+  camera.lookAt(lookAt.x, CFG.cameraHeight * 0.5, lookAt.z);
+
+  /* Sky follows camera */
+  skyMesh.position.copy(camera.position);
+  sunMesh.position.set(camera.position.x + 60, 80, camera.position.z - 150);
+  moonGroup.position.set(camera.position.x - 70, 64, camera.position.z - 130);
+  if (starsMesh) starsMesh.position.copy(camera.position);
+  auroraGroup.position.set(camera.position.x, 0, camera.position.z - 160);
+
+  /* Progress bar */
+  const pct = Math.round(scrollProgress * 100);
+  progFill.style.width = pct + '%';
+  progPct.textContent  = pct + '%';
+
+  /* Nearest milestone label */
+  let nearestDist  = Infinity;
+  let nearestIndex = 0;
+  milestoneT.forEach((t, i) => {
+    const d = Math.abs(camT - t);
+    if (d < nearestDist) { nearestDist = d; nearestIndex = i; }
+  });
+  progMs.textContent = MILESTONES[nearestIndex].year;
+
+  /* ── Tooltip: show when camera is close to a sign ── */
+  let showTip = false;
+  let tipSign = -1;
+  if (scrollProgress < 0.955) {
+    signObjects.forEach((so, i) => {
+      const distanceAhead = milestoneT[i] - camT;
+      if (distanceAhead < 0.018 && distanceAhead > 0.001) { showTip = true; tipSign = i; }
+    });
+  }
+
+  if (showTip && tipSign !== activeTooltipSign) {
+    activeTooltipSign = tipSign;
+    const ms = MILESTONES[tipSign];
+    tYear.textContent  = ms.year;
+    tTitle.textContent = ms.title;
+    tDesc.textContent  = ms.desc;
+    tImg.textContent   = ms.image ? '' : '[ IMAGE PLACEHOLDER ]';
+    tImg.style.backgroundImage = '';
+    if (ms.image) {
+      tImg.style.backgroundImage  = `url(${ms.image})`;
+      tImg.style.backgroundSize   = 'cover';
+      tImg.style.backgroundPosition = 'center';
+    }
+    /* Project sign world pos to screen */
+    const so  = signObjects[tipSign];
+    const v3  = so.worldPos.clone();
+    v3.project(camera);
+    const sw  = wrapper.clientWidth;
+    const sh  = wrapper.clientHeight;
+    const sx  = ( v3.x * 0.5 + 0.5) * sw;
+    const sy  = (-v3.y * 0.5 + 0.5) * sh;
+    tooltip.style.left   = Math.max(10, Math.min(sw - 230, sx - 110)) + 'px';
+    tooltip.style.top    = Math.max(10, sy - 220) + 'px';
+    tooltip.classList.add('visible');
+  } else if (!showTip) {
+    tooltip.classList.remove('visible');
+    activeTooltipSign = -1;
+  }
+
+  /* ── Dead end ── */
+  if (scrollProgress > 0.975 && !deadEndReached) {
+    deadEndReached = true;
+    tooltip.classList.remove('visible');
+    activeTooltipSign = -1;
+    deadOverlay.classList.add('visible');
+    setTimeout(() => scrollHint.classList.add('show'), 1600);
+  } else if (scrollProgress < 0.94 && deadEndReached) {
+    deadEndReached = false;
+    deadOverlay.classList.remove('visible');
+    scrollHint.classList.remove('show');
+  }
+}
+
+function updateScroll() {
+  const module = document.getElementById('road-module');
+  const rect   = module.getBoundingClientRect();
+  const viewH  = window.innerHeight;
+
+  /* How far into the module are we (0→1) */
+  const scrolled = -rect.top;
+  const scrollable = Math.max(1, MODULE_SCROLL_HEIGHT - viewH);
+  updateRoadProgress(scrolled / scrollable);
+}
+
+window.addEventListener('message', event => {
+  if (!IS_EMBEDDED_ROAD || event.origin !== window.location.origin) return;
+  if (event.data?.type === 'road-progress') updateRoadProgress(event.data.progress);
+});
+
+if (!IS_EMBEDDED_ROAD) {
+  window.addEventListener('scroll', updateScroll, { passive: true });
+}
+updateRoadProgress(0);
+
+/* ═══════════════════════════════════════════════════════════════
+   THEME TOGGLE
+═══════════════════════════════════════════════════════════════ */
+function toggleTheme() {
+  isNight = !isNight;
+  document.getElementById('theme-label').textContent = isNight ? 'EMBER MODE' : 'BLOOD MODE';
+
+  const T   = THEMES[isNight ? 'night' : 'day'];
+  const dur = 1200; // ms
+
+  /* Sky */
+  lerpColor(skyMat.uniforms.uTopColor.value, T.skyTop, dur);
+  lerpColor(skyMat.uniforms.uMidColor.value, T.skyMid, dur);
+  lerpColor(skyMat.uniforms.uHorColor.value, T.skyHor, dur);
+
+  /* Fog */
+  lerpColor(scene.fog.color, T.fogColor, dur);
+  lerpNum(scene.fog, 'near', T.fogNear, dur);
+  lerpNum(scene.fog, 'far',  T.fogFar,  dur);
+
+  /* Lights */
+  lerpNum(ambientLight,  'intensity', T.ambientInt, dur);
+  lerpNum(sunLight,      'intensity', T.sunInt,     dur);
+  lerpNum(nightAmbient,  'intensity', isNight ? 0.4 : 0.0, dur);
+
+  /* Sun visible */
+  sunMesh.visible = !isNight;
+
+  /* Stars */
+  if (starsMesh) lerpNum(starsMesh.material, 'opacity', isNight ? 0.96 : 0.78, dur);
+
+  /* Aurora */
+  auroraMeshes.forEach((m, i) => {
+    lerpNum(m.material.uniforms.uOpacity, 'value', isNight ? 0.36 - i * 0.05 : 0.16 - i * 0.03, dur);
+  });
+
+  /* Background */
+  lerpColor(scene.background, T.skyTop, dur);
+
+  /* Rebuild signs and dead end with new theme colors */
+  setTimeout(() => {
+    buildSigns();
+    buildDeadEnd();
+    scene.remove(treeGroup);
+    treeGroup.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
+    treeGroup = buildTrees();
+  }, dur / 2);
+}
+
+/* Linear interpolation helpers */
+function lerpColor(target, goal, dur) {
+  const start = target.clone();
+  const t0    = performance.now();
+  function step(now) {
+    const p = Math.min((now - t0) / dur, 1);
+    const e = 1 - Math.pow(1 - p, 3);
+    target.lerpColors(start, goal, e);
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+function lerpNum(obj, key, goal, dur) {
+  const start = obj[key];
+  const t0    = performance.now();
+  function step(now) {
+    const p = Math.min((now - t0) / dur, 1);
+    const e = 1 - Math.pow(1 - p, 3);
+    obj[key] = start + (goal - start) * e;
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SIGN HOVER (raycasting)
+═══════════════════════════════════════════════════════════════ */
+const raycaster = new THREE.Raycaster();
+const mouse     = new THREE.Vector2();
+let hoveredSign = -1;
+
+function onPointerMove(e) {
+  const rect = wrapper.getBoundingClientRect();
+  const cx   = (e.clientX || (e.touches && e.touches[0].clientX) || 0);
+  const cy   = (e.clientY || (e.touches && e.touches[0].clientY) || 0);
+  mouse.x    =  ((cx - rect.left) / rect.width)  * 2 - 1;
+  mouse.y    = -((cy - rect.top)  / rect.height) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+
+  const boards = signObjects.map(so => so.board);
+  const hits   = raycaster.intersectObjects(boards);
+
+  if (hits.length > 0) {
+    const idx = boards.indexOf(hits[0].object);
+    if (idx !== hoveredSign) {
+      hoveredSign = idx;
+      wrapper.style.cursor = 'pointer';
+    }
+  } else {
+    hoveredSign = -1;
+    wrapper.style.cursor = 'default';
+  }
+}
+wrapper.addEventListener('mousemove', onPointerMove);
+wrapper.addEventListener('touchstart', onPointerMove, { passive: true });
+
+/* ═══════════════════════════════════════════════════════════════
+   ANIMATION LOOP
+═══════════════════════════════════════════════════════════════ */
+const clock = new THREE.Clock();
+
+function animate() {
+  requestAnimationFrame(animate);
+  const elapsed = clock.getElapsedTime();
+
+  /* Aurora shimmer */
+  auroraMeshes.forEach((m, i) => {
+    m.material.uniforms.uTime.value = elapsed + i * 1.2;
+  });
+
+  if (elapsed > nextShootingStarAt) {
+    const available = shootingStars.find(star => !star.active);
+    if (available) launchShootingStar(available);
+    nextShootingStarAt = elapsed + 0.55 + Math.random() * 1.35;
+  }
+
+  shootingStars.forEach(star => {
+    if (!star.active) return;
+    star.life += 0.018;
+    const p = Math.min(1, star.life / star.duration);
+    const eased = 1 - Math.pow(1 - p, 3);
+    star.sprite.position.lerpVectors(star.start, star.end, eased);
+    star.mat.opacity = Math.sin(p * Math.PI) * 0.95;
+    const pulse = 0.82 + Math.sin(p * Math.PI) * 0.24;
+    star.sprite.scale.set(star.baseScale.x * pulse, star.baseScale.y, 1);
+    if (p >= 1) {
+      star.active = false;
+      star.mat.opacity = 0;
+      star.sprite.visible = false;
+    }
+  });
+
+  /* Sign boards subtle breathe (scale y) */
+  signObjects.forEach((so, i) => {
+    const board = so.board;
+    board.scale.y = 1 + Math.sin(elapsed * 0.8 + i) * 0.008;
+  });
+
+  renderer.render(scene, camera);
+}
+animate();
+
+/* ═══════════════════════════════════════════════════════════════
+   TOUCH SWIPE — mobile scroll feel
+═══════════════════════════════════════════════════════════════ */
+let touchStartY = 0;
+wrapper.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: true });
+wrapper.addEventListener('touchmove', e => {
+  /* Allow native scroll to drive the module */
+}, { passive: true });
+
+</script>
+</body>
+</html>
