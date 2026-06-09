@@ -1488,9 +1488,9 @@ function updateRoadProgress(progress) {
 
   /* ── Dead end ── */
   const finalMilestoneT = milestoneT[milestoneT.length - 1];
-  const finalMilestoneCleared = camT > finalMilestoneT + 0.045;
-  const creditsReady = scrollProgress > 0.985 && finalMilestoneCleared;
-  const shouldHideCredits = scrollProgress < 0.965 || camT < finalMilestoneT + 0.025;
+  const finalMilestoneCleared = camT > finalMilestoneT + 0.006;
+  const creditsReady = scrollProgress > 0.975 && finalMilestoneCleared;
+  const shouldHideCredits = scrollProgress < 0.955 || camT < finalMilestoneT - 0.004;
 
   if (creditsReady && !deadEndReached) {
     deadEndReached = true;

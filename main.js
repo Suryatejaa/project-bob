@@ -1,6 +1,5 @@
 const state = {
   data: null,
-  activeDialogue: 0,
   lenis: null
 };
 
@@ -8,8 +7,6 @@ const app = document.querySelector("#app");
 const preloader = document.querySelector("[data-preloader]");
 const preloaderName = document.querySelector("[data-preloader-name]");
 const preloaderBar = document.querySelector("[data-preloader-bar]");
-const filmModal = document.querySelector("[data-film-modal]");
-const modalPanel = document.querySelector("[data-modal-panel]");
 
 document.addEventListener("DOMContentLoaded", init);
 
@@ -35,11 +32,6 @@ function renderSite(data) {
     ${renderHero(data)}
     ${renderHexSphereChapter(data.chapters[1])}
     ${renderRoadMapSection()}
-    ${renderPersonality(data)}
-    ${renderStats(data.stats)}
-    ${renderDialogues(data.dialogues)}
-    ${renderPhilanthropy(data.philanthropy)}
-    ${renderClosing(data.closing)}
   `;
 }
 
@@ -391,21 +383,6 @@ function setupInteractions() {
   document.addEventListener("click", (event) => {
     const interactive = event.target.closest(".interactive");
     if (interactive) createRipple(event, interactive);
-
-    const filter = event.target.closest("[data-filter]");
-    if (filter) applyFilmFilter(filter);
-
-    const filmCard = event.target.closest("[data-film-id]");
-    if (filmCard && !filter) openFilmModal(filmCard.dataset.filmId);
-
-    if (event.target.closest("[data-modal-close]")) closeFilmModal();
-    if (event.target.closest("[data-dialogue-prev]")) changeDialogue(-1);
-    if (event.target.closest("[data-dialogue-next]")) changeDialogue(1);
-    if (event.target.closest("[data-confetti]")) celebrate();
-  });
-
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") closeFilmModal();
   });
 
   document.addEventListener("mouseover", (event) => {
@@ -455,82 +432,6 @@ function setupAnimations() {
     });
   });
 
-  setupTimelineAnimation();
-
-  gsap.utils.toArray(".personality-card, .film-card, .stat-card, .philanthropy-card").forEach((card) => {
-    gsap.from(card, {
-      opacity: 0,
-      y: 54,
-      duration: 0.75,
-      ease: "power3.out",
-      scrollTrigger: { trigger: card, start: "top 86%" }
-    });
-  });
-
-  ScrollTrigger.create({
-    trigger: ".stats-section",
-    start: "top 58%",
-    once: true,
-    onEnter: runCounters
-  });
-
-  gsap.from(".dialogue-stage", {
-    opacity: 0,
-    scale: 0.94,
-    duration: 1,
-    ease: "power3.out",
-    scrollTrigger: { trigger: ".dialogue-section", start: "top 65%" }
-  });
-
-  gsap.from(".closing-content", {
-    opacity: 0,
-    y: 60,
-    duration: 1,
-    ease: "power3.out",
-    scrollTrigger: { trigger: ".closing-section", start: "top 65%" }
-  });
-}
-
-function setupTimelineAnimation() {
-  const section = document.querySelector("[data-timeline-section]");
-  const track = document.querySelector("[data-timeline-track]");
-  const progress = document.querySelector("[data-timeline-progress]");
-  const liveYear = document.querySelector("[data-live-year]");
-  if (!section || !track) return;
-
-  if (matchMedia("(min-width: 768px)").matches) {
-    gsap.to(track, {
-      x: () => -(track.scrollWidth - window.innerWidth) + "px",
-      ease: "none",
-      scrollTrigger: {
-        trigger: section,
-        pin: true,
-        scrub: 1,
-        end: () => `+=${track.scrollWidth - window.innerWidth}`,
-        invalidateOnRefresh: true,
-        onUpdate: (self) => {
-          gsap.set(progress, { scaleX: self.progress });
-          const cards = gsap.utils.toArray(".timeline-card");
-          const index = Math.min(cards.length - 1, Math.floor(self.progress * cards.length));
-          liveYear.textContent = cards[index].dataset.year;
-        }
-      }
-    });
-  }
-
-  gsap.utils.toArray(".timeline-card").forEach((card) => {
-    gsap.from(card, {
-      opacity: 0,
-      y: 34,
-      duration: 0.7,
-      ease: "power3.out",
-      scrollTrigger: {
-        trigger: card,
-        start: matchMedia("(min-width: 768px)").matches ? "left 82%" : "top 82%",
-        toggleActions: "play none none reverse"
-      }
-    });
-  });
 }
 
 function runPreloader(name) {
@@ -583,104 +484,4 @@ function createRipple(event, element) {
   ripple.style.top = `${y}px`;
   element.appendChild(ripple);
   ripple.addEventListener("animationend", () => ripple.remove());
-}
-
-function applyFilmFilter(button) {
-  document.querySelectorAll("[data-filter]").forEach((item) => item.classList.remove("is-active"));
-  button.classList.add("is-active");
-
-  const filter = button.dataset.filter;
-  const cards = gsap.utils.toArray(".film-card");
-
-  cards.forEach((card) => {
-    const shouldShow =
-      filter === "All" ||
-      card.dataset.decade === filter ||
-      (filter === "Milestones" && !["style", "current", "festival"].includes(card.dataset.milestone));
-
-    gsap.to(card, {
-      opacity: shouldShow ? 1 : 0,
-      scale: shouldShow ? 1 : 0.9,
-      duration: 0.25,
-      onComplete: () => {
-        card.style.display = shouldShow ? "inline-block" : "none";
-      }
-    });
-  });
-}
-
-function openFilmModal(id) {
-  const film = state.data.films.find((item) => item.id === id);
-  if (!film) return;
-
-  modalPanel.innerHTML = `
-    <img src="${film.poster}" alt="${film.title}" />
-    <div>
-      <div class="meta-line">${film.year} / ${film.director}</div>
-      <h2>${film.title}</h2>
-      <p>${film.description}</p>
-      <p><strong>Role:</strong> ${film.role}</p>
-      <p><strong>Collection:</strong> ${film.collection}</p>
-      <div>${film.awards.map((award) => `<span class="badge">${award}</span>`).join("")}</div>
-    </div>
-  `;
-  filmModal.classList.add("is-open");
-  filmModal.setAttribute("aria-hidden", "false");
-}
-
-function closeFilmModal() {
-  filmModal.classList.remove("is-open");
-  filmModal.setAttribute("aria-hidden", "true");
-}
-
-function changeDialogue(direction) {
-  const dialogues = state.data.dialogues;
-  state.activeDialogue = (state.activeDialogue + direction + dialogues.length) % dialogues.length;
-  const dialogue = dialogues[state.activeDialogue];
-  const line = document.querySelector("[data-dialogue-line]");
-  const meta = document.querySelector("[data-dialogue-meta]");
-
-  gsap.to([line, meta], {
-    opacity: 0,
-    y: 18,
-    duration: 0.2,
-    onComplete: () => {
-      line.textContent = dialogue.line;
-      meta.textContent = `${dialogue.film} / ${dialogue.year}`;
-      gsap.to([line, meta], { opacity: 1, y: 0, duration: 0.35, stagger: 0.05 });
-    }
-  });
-}
-
-function runCounters() {
-  document.querySelectorAll("[data-count]").forEach((item) => {
-    const value = Number(item.dataset.count);
-    if (window.countUp?.CountUp) {
-      new window.countUp.CountUp(item.id, value, { duration: 2.4 }).start();
-    } else if (window.CountUp) {
-      new window.CountUp(item.id, value, { duration: 2.4 }).start();
-    } else {
-      const counter = { value: 0 };
-      gsap.to(counter, {
-        value,
-        duration: 2.4,
-        ease: "power2.out",
-        snap: { value: 1 },
-        onUpdate: () => {
-          item.textContent = counter.value.toLocaleString("en-IN");
-        }
-      });
-    }
-  });
-}
-
-function celebrate() {
-  if (!window.confetti) return;
-
-  window.confetti({
-    particleCount: 120,
-    spread: 72,
-    origin: { y: 0.72 },
-    colors: ["#EF9F27", "#FAC775", "#F4F0E6"]
-  });
 }
