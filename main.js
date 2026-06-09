@@ -121,7 +121,7 @@ function renderRoadMapSection() {
       <div class="roadmap-sticky">
         <div class="roadmap-chapter-copy">
           <div class="kicker">Chapter 03</div>
-          <h2>The Road</h2>
+          <h4>The Road</h4>
           <p>Milestones, achievements, charity, and the legacy beyond the theatre screen.</p>
         </div>
         <iframe

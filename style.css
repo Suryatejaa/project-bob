@@ -461,9 +461,9 @@ video {
   z-index: 3;
 }
 
-.roadmap-chapter-copy h2 {
+.roadmap-chapter-copy h4 {
   color: var(--blood-bright);
-  font-size: clamp(58px, 9vw, 132px);
+  font-size: clamp(50px, 6vw, 112px);
   font-weight: 900;
   letter-spacing: 0;
   line-height: 0.78;
@@ -476,7 +476,7 @@ video {
 
 .roadmap-chapter-copy p {
   color: rgba(244, 240, 230, 0.76);
-  font-size: clamp(18px, 2vw, 28px);
+  font-size: 10px;
   line-height: 1.2;
   margin: 0;
   max-width: 680px;
