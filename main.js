@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", init);
 
 async function init() {
   try {
+    setupStableViewport();
     const response = await fetch("./data.json");
     state.data = await response.json();
     renderSite(state.data);
@@ -25,6 +26,32 @@ async function init() {
     app.innerHTML = `<section class="section"><h1>Unable to load tribute data.</h1><p>${error.message}</p></section>`;
     app.style.opacity = 1;
   }
+}
+
+function setupStableViewport() {
+  const root = document.documentElement;
+  let lastWidth = window.innerWidth;
+
+  function setAppHeight() {
+    root.style.setProperty("--app-height", `${window.innerHeight}px`);
+  }
+
+  setAppHeight();
+
+  window.addEventListener("resize", () => {
+    if (window.innerWidth === lastWidth) return;
+    lastWidth = window.innerWidth;
+    setAppHeight();
+    window.ScrollTrigger?.refresh();
+  });
+
+  window.addEventListener("orientationchange", () => {
+    setTimeout(() => {
+      lastWidth = window.innerWidth;
+      setAppHeight();
+      window.ScrollTrigger?.refresh();
+    }, 250);
+  });
 }
 
 function renderSite(data) {
@@ -70,23 +97,6 @@ function renderHero(data) {
   `;
 }
 
-function renderChapter(chapter) {
-  const words = chapter.title
-    .split(" ")
-    .map((word) => `<span><b>${word}</b></span>`)
-    .join("");
-
-  return `
-    <section class="section chapter-section">
-      <div class="chapter-inner">
-        <div class="kicker">${chapter.kicker}</div>
-        <h2 class="chapter-title">${words}</h2>
-        <p class="chapter-quote">${chapter.quote}</p>
-      </div>
-    </section>
-  `;
-}
-
 function renderHexSphereChapter(chapter) {
   return `
     <section class="section hex-chapter-section" data-hex-chapter>
@@ -122,197 +132,6 @@ function renderRoadMapSection() {
           loading="lazy"
           data-roadmap-frame
         ></iframe>
-      </div>
-    </section>
-  `;
-}
-
-function renderTimeline(items) {
-  return `
-    <section class="section timeline-section" data-timeline-section>
-      <div class="timeline-header">
-        <div>
-          <div class="timeline-label">Timeline</div>
-          <div class="section-heading"><h2>The Boy Inside Cinema</h2></div>
-        </div>
-        <div class="timeline-year-live" data-live-year>${items[0].year}</div>
-      </div>
-      <div class="timeline-track" data-timeline-track>
-        ${items
-          .map(
-            (item) => `
-              <article class="timeline-card" data-year="${item.year}">
-                <img src="${item.image}" alt="${item.event}" />
-                <div>
-                  <div class="meta-line">${item.year} / Age ${item.age}</div>
-                  <h3>${item.event}</h3>
-                  <p>${item.description}</p>
-                </div>
-              </article>
-            `
-          )
-          .join("")}
-      </div>
-      <div class="timeline-progress"><span data-timeline-progress></span></div>
-    </section>
-  `;
-}
-
-function renderPersonality(data) {
-  return `
-    <section class="section personality-section">
-      <div class="section-heading">
-        <div class="kicker">The Mahesh Babu Formula</div>
-        <h2>Class is calm. Mass is timing.</h2>
-        <p>${data.meta.birthday_message}</p>
-      </div>
-      <div class="personality-grid">
-        ${data.personality
-          .map(
-            (item) => `
-              <article class="personality-card">
-                <h3>${item.trait}</h3>
-                <p>${item.copy}</p>
-              </article>
-            `
-          )
-          .join("")}
-      </div>
-    </section>
-  `;
-}
-
-function renderFilms(films) {
-  const decades = ["All", ...new Set(films.map((film) => film.decade))];
-  return `
-    <section class="section films-section">
-      <div class="section-heading">
-        <div class="kicker">Film Wall</div>
-        <h2>The Frames Fans Remember</h2>
-        <p>Chosen like memories from a fan's heart, not a poster dump.</p>
-      </div>
-      <div class="filter-bar">
-        ${decades
-          .map(
-            (decade, index) => `
-              <button class="filter-button interactive ${index === 0 ? "is-active" : ""}" data-filter="${decade}">
-                ${decade}
-              </button>
-            `
-          )
-          .join("")}
-        <button class="filter-button interactive" data-filter="Milestones">Milestones</button>
-      </div>
-      <div class="film-grid" data-film-grid>
-        ${films.map(renderFilmCard).join("")}
-      </div>
-    </section>
-  `;
-}
-
-function renderFilmCard(film) {
-  return `
-    <article class="film-card interactive" data-film-id="${film.id}" data-decade="${film.decade}" data-milestone="${film.milestone}">
-      <img src="${film.poster}" alt="${film.title}" />
-      <div class="film-overlay">
-        <div class="meta-line">${film.year} / ${film.collection}</div>
-        <h3>${film.title}</h3>
-        <div class="film-details">
-          <p>${film.description}</p>
-          <span class="badge">${film.milestone}</span>
-          <span class="badge">${film.genre[0]}</span>
-        </div>
-      </div>
-    </article>
-  `;
-}
-
-function renderStats(stats) {
-  const cards = [
-    ["Films", stats.total_films, "credited screen journey"],
-    ["Years", stats.years_in_industry, "from first appearance"],
-    ["Box Office", stats.box_office_number, "crores and counting"],
-    ["Fan Clubs", stats.fan_clubs_worldwide, "worldwide fan energy"]
-  ];
-
-  return `
-    <section class="section stats-section">
-      <div class="stats-ghost">${stats.box_office_total}</div>
-      <div class="section-heading">
-        <div class="kicker">The Numbers</div>
-        <h2>Data, but with goosebumps.</h2>
-        <p>Milestones that feel less like arithmetic and more like applause.</p>
-      </div>
-      <div class="stats-grid">
-        ${cards
-          .map(
-            ([label, value, context], index) => `
-              <article class="stat-card">
-                <div class="stat-label">${label}</div>
-                <div class="stat-value" id="stat-${index}" data-count="${value}">0</div>
-                <p>${context}</p>
-              </article>
-            `
-          )
-          .join("")}
-      </div>
-    </section>
-  `;
-}
-
-function renderDialogues(dialogues) {
-  return `
-    <section class="section dialogue-section">
-      <div class="dialogue-stage">
-        <div class="kicker">Dialogue Chamber</div>
-        <p class="dialogue-line" data-dialogue-line>${dialogues[0].line}</p>
-        <div class="dialogue-meta" data-dialogue-meta>${dialogues[0].film} / ${dialogues[0].year}</div>
-        <div class="dialogue-controls">
-          <button class="icon-button interactive" data-dialogue-prev aria-label="Previous dialogue">‹</button>
-          <button class="icon-button interactive" data-dialogue-next aria-label="Next dialogue">›</button>
-        </div>
-      </div>
-    </section>
-  `;
-}
-
-function renderPhilanthropy(items) {
-  return `
-    <section class="section philanthropy-section">
-      <div class="section-heading">
-        <div class="kicker">Beyond Cinema</div>
-        <h2>The quiet side of stardom.</h2>
-        <p>Premium does not always mean louder. Sometimes it means kinder.</p>
-      </div>
-      <div class="philanthropy-grid">
-        ${items
-          .map(
-            (item) => `
-              <article class="philanthropy-card">
-                <img src="${item.image}" alt="${item.initiative}" />
-                <div>
-                  <div class="meta-line">${item.year_started}</div>
-                  <h3>${item.initiative}</h3>
-                  <p>${item.description}</p>
-                </div>
-              </article>
-            `
-          )
-          .join("")}
-      </div>
-    </section>
-  `;
-}
-
-function renderClosing(closing) {
-  return `
-    <section class="section closing-section">
-      <div class="closing-content">
-        <div class="kicker">${closing.wish_subtitle}</div>
-        <h2 class="closing-title">${closing.wish_title}</h2>
-        <p class="closing-body">${closing.wish_body}</p>
-        <button class="wish-button interactive" data-confetti>Light the screen</button>
-        <p class="meta-line">${closing.signature}</p>
       </div>
     </section>
   `;
@@ -406,30 +225,6 @@ function setupAnimations() {
       end: "bottom top",
       scrub: true
     }
-  });
-
-  gsap.utils.toArray(".chapter-section").forEach((section) => {
-    gsap.from(section.querySelectorAll(".chapter-title b"), {
-      yPercent: 100,
-      duration: 1,
-      ease: "power3.out",
-      stagger: 0.12,
-      scrollTrigger: { trigger: section, start: "top 70%" }
-    });
-
-    gsap.from(section.querySelector(".chapter-inner"), {
-      borderLeftColor: "rgba(239,159,39,0)",
-      duration: 0.8,
-      scrollTrigger: { trigger: section, start: "top 72%" }
-    });
-
-    gsap.from(section.querySelector(".chapter-quote"), {
-      opacity: 0,
-      y: 28,
-      duration: 0.8,
-      delay: 0.18,
-      scrollTrigger: { trigger: section, start: "top 70%" }
-    });
   });
 
 }

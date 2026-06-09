@@ -4,6 +4,31 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mahesh Babu — The Journey</title>
+<script>
+  (() => {
+    const root = document.documentElement;
+    let lastWidth = window.innerWidth;
+
+    function setRoadHeight() {
+      root.style.setProperty('--road-height', `${window.innerHeight}px`);
+    }
+
+    setRoadHeight();
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth === lastWidth) return;
+      lastWidth = window.innerWidth;
+      setRoadHeight();
+    });
+
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => {
+        lastWidth = window.innerWidth;
+        setRoadHeight();
+      }, 250);
+    });
+  })();
+</script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Mono:wght@300;400&display=swap');
 
@@ -19,6 +44,7 @@
     --blood-dark: #260004;
     --blood-glow: rgba(255, 38, 56, 0.32);
     --panel: rgba(5, 0, 4, 0.82);
+    --road-height: 100vh;
   }
 
   body {
@@ -31,7 +57,7 @@
   }
 
   body.is-embedded-road {
-    height: 100vh;
+    height: var(--road-height);
     overflow: hidden;
   }
 
@@ -46,7 +72,7 @@
     position: sticky;
     top: 0;
     width: 100%;
-    height: 100vh;
+    height: var(--road-height);
     background:
       radial-gradient(circle at 50% 42%, rgba(255, 38, 56, 0.16), transparent 42vw),
       #030303;
@@ -372,8 +398,8 @@
 
     <!-- Dead End Overlay -->
     <div id="deadend-overlay">
-      <div class="deadend-text">The Impact Continues</div>
-      <div class="deadend-sub">STAR POWER · SERVICE · LEGACY</div>
+      <div class="deadend-text">Filmed for IMAX</div>
+      <div class="deadend-sub">April 7, 2027 </div>
       <div class="scroll-hint" id="scroll-hint">
         <span>SCROLL TO CONTINUE</span>
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
