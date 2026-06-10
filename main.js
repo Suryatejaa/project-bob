@@ -18,6 +18,7 @@ async function init() {
     renderSite(state.data);
     setupSmoothScroll();
     setupRoadMapBridge();
+    setupAwardCarousel();
     setupCursor();
     setupInteractions();
     setupAnimations();
@@ -59,6 +60,10 @@ function renderSite(data) {
     ${renderHero(data)}
     ${renderHexSphereChapter(data.chapters[1])}
     ${renderRoadMapSection()}
+    ${renderAwardsChapter(data)}
+    ${renderGalleryChapter(data.gallery)}
+    ${renderBirthdayWish(data.closing)}
+    ${renderDeveloperChapter(data.developer)}
   `;
 }
 
@@ -137,6 +142,150 @@ function renderRoadMapSection() {
   `;
 }
 
+function renderAwardsChapter(data) {
+  const awardGroups = [
+    ["Nandi Awards", data.awards.nandi_awards],
+    ["Filmfare Awards South", data.awards.filmfare_awards_south],
+    ["National Film Awards", data.awards.national_film_awards]
+  ];
+  const totalAwards = awardGroups.reduce((sum, [, items]) => sum + items.length, 0);
+  const awards = awardGroups.flatMap(([group, items]) => items.map((award) => ({ ...award, group })));
+
+  return `
+    <section class="section awards-section" data-reveal-section>
+      <div class="section-heading awards-heading">
+        <div class="kicker">Chapter 04</div>
+        <h2>The Recognition</h2>
+        <p>Awards, box office fire, and the future scale waiting at the horizon.</p>
+      </div>
+
+      <div class="awards-hero-strip">
+        <article>
+          <span>${totalAwards}</span>
+          <p>major listed awards</p>
+        </article>
+        <article>
+          <span>${data.top_grossing_movies.length}</span>
+          <p>top theatrical storms</p>
+        </article>
+        <article>
+          <span>${data.upcoming_project.format}</span>
+          <p>${data.upcoming_project.title}</p>
+        </article>
+      </div>
+
+      <div class="awards-layout">
+        <div class="award-holo" data-award-carousel>
+          <div class="award-scanner" aria-hidden="true">
+            <span>${totalAwards}</span>
+            <b>Awards</b>
+          </div>
+          <div class="award-carousel-window">
+            <div class="award-carousel-track" data-award-track>
+              ${awards.map((award, index) => `
+                <article class="award-holo-card ${index === 0 ? "is-active" : ""}" data-award-card>
+                  <div class="award-card-glow" aria-hidden="true"></div>
+                  <span class="award-year">${award.year}</span>
+                  <strong>${award.movie}</strong>
+                  <p>${award.category}</p>
+                  <em>${award.group}</em>
+                </article>
+              `).join("")}
+            </div>
+          </div>
+          <div class="award-controls">
+            <div class="award-readout" data-award-readout>01 / ${String(awards.length).padStart(2, "0")}</div>
+            <div class="award-swipe-hint">Swipe</div>
+          </div>
+        </div>
+        <aside class="grossers-panel">
+          <div class="kicker">Box Office Pulse</div>
+          <div class="grossers-list">
+            ${data.top_grossing_movies.map((movie) => `
+              <article class="grosser-row">
+                <div>
+                  <strong>${movie.movie}</strong>
+                  <span>${movie.year} / ${movie.status}</span>
+                </div>
+                <b>${movie.worldwide_gross}</b>
+              </article>
+            `).join("")}
+          </div>
+          <div class="upcoming-card">
+            <div class="kicker">Next Roar</div>
+            <h3>${data.upcoming_project.title}</h3>
+            <p>${data.upcoming_project.director} · ${data.upcoming_project.projected_release_year} · ${data.upcoming_project.estimated_budget}</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+  `;
+}
+
+function renderGalleryChapter(gallery) {
+  return `
+    <section class="section gallery-section" data-reveal-section>
+      <div class="section-heading gallery-heading">
+        <div class="kicker">Chapter 05</div>
+        <h2>Photo Gallery</h2>
+        <p>Not a poster dump. Just chosen frames that feel like fan memory.</p>
+      </div>
+      <div class="gallery-wall">
+        ${gallery.map((item, index) => `
+          <figure class="gallery-tile gallery-tile-${(index % 4) + 1}">
+            <img src="${item.url}" alt="${item.caption}" loading="lazy" />
+            <figcaption>
+              <span>${item.era} / ${item.type}</span>
+              <strong>${item.caption}</strong>
+            </figcaption>
+          </figure>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderBirthdayWish(closing) {
+  return `
+    <section class="section birthday-section" data-reveal-section>
+      <div class="birthday-orbit" aria-hidden="true"></div>
+      <div class="birthday-content">
+        <div class="kicker">Chapter 06</div>
+        <h2>${closing.wish_title}</h2>
+        <p class="birthday-subtitle">${closing.wish_subtitle}</p>
+        <p class="birthday-body">${closing.wish_body}</p>
+        <div class="birthday-signature">${closing.signature}</div>
+      </div>
+    </section>
+  `;
+}
+
+function renderDeveloperChapter(developer) {
+  return `
+    <section class="section developer-section" data-reveal-section>
+      <div class="developer-frame">
+        <div class="developer-copy">
+          <div class="kicker">${developer.chapter}</div>
+          <h2>${developer.title}</h2>
+          <div class="developer-name">${developer.name}</div>
+          <p class="developer-role">${developer.role}</p>
+          <p>${developer.note}</p>
+          <div class="developer-rsvp">${developer.rsvp}</div>
+          <div class="developer-links">
+            ${developer.links.map((link) => `
+              <a class="interactive" href="${link.url}" target="_blank" rel="noopener noreferrer">${link.label}</a>
+            `).join("")}
+          </div>
+          <span>${developer.signature}</span>
+        </div>
+        <figure class="developer-portrait">
+          <img src="${developer.image}" alt="${developer.name}" loading="lazy" />
+        </figure>
+      </div>
+    </section>
+  `;
+}
+
 function setupSmoothScroll() {
   gsap.registerPlugin(ScrollTrigger);
 
@@ -182,6 +331,78 @@ function setupRoadMapBridge() {
   requestSync();
 }
 
+function setupAwardCarousel() {
+  const carousel = document.querySelector("[data-award-carousel]");
+  if (!carousel) return;
+
+  const track = carousel.querySelector("[data-award-track]");
+  const cards = [...carousel.querySelectorAll("[data-award-card]")];
+  const readout = carousel.querySelector("[data-award-readout]");
+  let activeIndex = 0;
+  let startX = 0;
+  let dragX = 0;
+  let currentOffset = 0;
+
+  function render() {
+    const cardWidth = cards[0]?.offsetWidth || 280;
+    const gap = Number.parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap) || 18;
+    const windowWidth = carousel.querySelector(".award-carousel-window").offsetWidth;
+    const offset = (windowWidth - cardWidth) / 2 - activeIndex * (cardWidth + gap);
+
+    currentOffset = offset;
+    track.style.transform = `translate3d(${offset}px, 0, 0)`;
+    cards.forEach((card, index) => {
+      const distance = Math.abs(index - activeIndex);
+      card.classList.toggle("is-active", index === activeIndex);
+      card.style.setProperty("--distance", Math.min(distance, 4));
+    });
+    readout.textContent = `${String(activeIndex + 1).padStart(2, "0")} / ${String(cards.length).padStart(2, "0")}`;
+  }
+
+  function goTo(index) {
+    activeIndex = (index + cards.length) % cards.length;
+    render();
+  }
+
+  cards.forEach((card, index) => {
+    card.addEventListener("click", () => goTo(index));
+  });
+
+  carousel.addEventListener("pointerdown", (event) => {
+    startX = event.clientX;
+    dragX = event.clientX;
+    track.classList.add("is-dragging");
+    carousel.setPointerCapture?.(event.pointerId);
+  });
+
+  carousel.addEventListener("pointermove", (event) => {
+    if (!startX) return;
+    dragX = event.clientX;
+    const delta = dragX - startX;
+    track.style.transform = `translate3d(${currentOffset + delta * 0.42}px, 0, 0)`;
+  });
+
+  carousel.addEventListener("pointerup", () => {
+    if (!startX) return;
+    const delta = dragX - startX;
+    track.classList.remove("is-dragging");
+    if (Math.abs(delta) > 38) goTo(activeIndex + (delta < 0 ? 1 : -1));
+    else render();
+    startX = 0;
+    dragX = 0;
+  });
+
+  carousel.addEventListener("pointercancel", () => {
+    track.classList.remove("is-dragging");
+    render();
+    startX = 0;
+    dragX = 0;
+  });
+
+  window.addEventListener("resize", render);
+  render();
+}
+
 function setupCursor() {
   const dot = document.querySelector(".cursor-dot");
   const ring = document.querySelector(".cursor-ring");
@@ -225,6 +446,20 @@ function setupAnimations() {
       end: "bottom top",
       scrub: true
     }
+  });
+
+  gsap.utils.toArray("[data-reveal-section]").forEach((section) => {
+    gsap.from(section.querySelectorAll(".section-heading, .awards-hero-strip article, .award-holo, .grossers-panel, .gallery-tile, .birthday-content, .developer-frame"), {
+      opacity: 0,
+      y: 42,
+      duration: 0.9,
+      ease: "power3.out",
+      stagger: 0.08,
+      scrollTrigger: {
+        trigger: section,
+        start: "top 70%"
+      }
+    });
   });
 
 }

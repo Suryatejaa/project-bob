@@ -37,20 +37,21 @@
   :root {
     --gold: #EF9F27;
     --gold-deep: #BA7517;
-    --cream: #F4F0E6;
-    --black: #0A0A0A;
+    --cream: #FFF0DA;
+    --black: #1A1018;
     --blood: #b50812;
     --blood-bright: #ff2638;
-    --blood-dark: #260004;
+    --blood-dark: #3a0206;
     --blood-glow: rgba(255, 38, 56, 0.32);
-    --panel: rgba(5, 0, 4, 0.82);
+    --panel: rgba(38, 22, 26, 0.82);
     --road-height: 100vh;
   }
 
   body {
     background:
-      radial-gradient(circle at 48% 18%, rgba(255, 38, 56, 0.08), transparent 34vw),
-      linear-gradient(180deg, #030303, #0a0103 46%, #050505);
+      radial-gradient(circle at 22% 12%, rgba(255, 210, 138, 0.18), transparent 34vw),
+      radial-gradient(circle at 82% 16%, rgba(176, 214, 255, 0.1), transparent 30vw),
+      linear-gradient(180deg, #2c1720, #4a241f 46%, #21151b);
     color: var(--cream);
     overflow-x: hidden;
     font-family: 'DM Mono', monospace;
@@ -74,8 +75,8 @@
     width: 100%;
     height: var(--road-height);
     background:
-      radial-gradient(circle at 50% 42%, rgba(255, 38, 56, 0.16), transparent 42vw),
-      #030303;
+      radial-gradient(circle at 50% 42%, rgba(255, 199, 122, 0.18), transparent 42vw),
+      #21151b;
     overflow: hidden;
   }
 
@@ -90,9 +91,9 @@
 
   #road-canvas-wrapper::before {
     background:
-      linear-gradient(90deg, rgba(255, 38, 56, 0.22), transparent 17%, transparent 83%, rgba(255, 38, 56, 0.18)),
-      radial-gradient(circle at 50% 45%, transparent 32%, rgba(0, 0, 0, 0.5) 100%);
-    opacity: 0.9;
+      linear-gradient(90deg, rgba(240, 166, 74, 0.18), transparent 17%, transparent 83%, rgba(228, 91, 68, 0.14)),
+      radial-gradient(circle at 50% 45%, transparent 36%, rgba(29, 16, 22, 0.36) 100%);
+    opacity: 0.72;
   }
 
   #road-canvas-wrapper::after {
@@ -471,36 +472,36 @@ let isNight = false;
 
 const THEMES = {
   day: {
-    skyTop:    new THREE.Color(0x050103),
-    skyMid:    new THREE.Color(0x190006),
-    skyHor:    new THREE.Color(0x4a0109),
-    fogColor:  new THREE.Color(0x190006),
+    skyTop:    new THREE.Color(0x221724),
+    skyMid:    new THREE.Color(0x5a2b20),
+    skyHor:    new THREE.Color(0xd1864a),
+    fogColor:  new THREE.Color(0x4a241f),
     fogNear:   24, fogFar: 120,
-    ambientInt: 0.58,
-    sunInt:    0.42,
-    roadColor: 0x080607,
-    grassColor:0x090203,
-    treeTrunk: 0x260004,
-    treeTop:   0x140003,
-    signPost:  0x5f0710,
-    signBoard: 0x120003,
+    ambientInt: 0.68,
+    sunInt:    0.62,
+    roadColor: 0x30292a,
+    grassColor:0x2b171c,
+    treeTrunk: 0x5a241c,
+    treeTop:   0x3b1820,
+    signPost:  0x8a3a2d,
+    signBoard: 0x2a151c,
     signText:  0xff2638,
   },
   night: {
-    skyTop:    new THREE.Color(0x000000),
-    skyMid:    new THREE.Color(0x070006),
-    skyHor:    new THREE.Color(0x1f0005),
-    fogColor:  new THREE.Color(0x080003),
+    skyTop:    new THREE.Color(0x171425),
+    skyMid:    new THREE.Color(0x2c1720),
+    skyHor:    new THREE.Color(0x6a2d24),
+    fogColor:  new THREE.Color(0x24151d),
     fogNear:   18, fogFar: 92,
-    ambientInt: 0.24,
-    sunInt:    0.08,
-    roadColor: 0x020202,
-    grassColor:0x040001,
-    treeTrunk: 0x150003,
-    treeTop:   0x090001,
-    signPost:  0x42060b,
-    signBoard: 0x060002,
-    signText:  0xf4f0e6,
+    ambientInt: 0.28,
+    sunInt:    0.18,
+    roadColor: 0x211d20,
+    grassColor:0x1d1218,
+    treeTrunk: 0x3a1818,
+    treeTop:   0x25121a,
+    signPost:  0x693024,
+    signBoard: 0x1f1218,
+    signText:  0xfff0da,
   }
 };
 
@@ -594,7 +595,7 @@ scene.add(skyMesh);
 
 /* Sun */
 const sunGeo = new THREE.SphereGeometry(4, 16, 16);
-const sunMat = new THREE.MeshBasicMaterial({ color: 0xff2638 });
+const sunMat = new THREE.MeshBasicMaterial({ color: 0xffb75b });
 const sunMesh = new THREE.Mesh(sunGeo, sunMat);
 sunMesh.position.set(60, 80, -150);
 scene.add(sunMesh);
@@ -807,7 +808,7 @@ function launchShootingStar(star) {
 const ambientLight = new THREE.AmbientLight(0xffffff, THEMES.day.ambientInt);
 scene.add(ambientLight);
 
-const sunLight = new THREE.DirectionalLight(0xff9aa3, THEMES.day.sunInt);
+const sunLight = new THREE.DirectionalLight(0xffc487, THEMES.day.sunInt);
 sunLight.position.set(80, 120, -60);
 sunLight.castShadow = true;
 sunLight.shadow.mapSize.set(1024, 1024);
@@ -820,7 +821,7 @@ sunLight.shadow.camera.bottom = -80;
 scene.add(sunLight);
 
 /* Night streetlamp glow */
-const nightAmbient = new THREE.AmbientLight(0x3a0206, 0.0);
+const nightAmbient = new THREE.AmbientLight(0x352233, 0.0);
 scene.add(nightAmbient);
 
 /* ═══════════════════════════════════════════════════════════════

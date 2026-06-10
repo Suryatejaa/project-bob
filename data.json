@@ -36,6 +36,45 @@
       "quote": "The love is not only for the star. It is for the person behind the light."
     }
   ],
+  "awards": {
+    "nandi_awards": [
+      { "year": 2015, "category": "Best Actor", "movie": "Srimanthudu" },
+      { "year": 2011, "category": "Best Actor", "movie": "Dookudu" },
+      { "year": 2005, "category": "Best Actor", "movie": "Athadu" },
+      { "year": 2003, "category": "Best Actor", "movie": "Nijam" },
+      { "year": 2003, "category": "Best Actor", "movie": "Okkadu" },
+      { "year": 2004, "category": "Special Jury Award", "movie": "Arjun" },
+      { "year": 2001, "category": "Special Jury Award", "movie": "Murari" },
+      { "year": 1999, "category": "Best Male Debut", "movie": "Rajakumarudu" },
+      { "year": 1988, "category": "Best Child Actor", "movie": "Mugguru Kodukulu" }
+    ],
+    "filmfare_awards_south": [
+      { "year": 2015, "category": "Best Actor - Telugu", "movie": "Srimanthudu" },
+      { "year": 2013, "category": "Best Actor - Telugu", "movie": "Seethamma Vakitlo Sirimalle Chettu" },
+      { "year": 2011, "category": "Best Actor - Telugu", "movie": "Dookudu" },
+      { "year": 2006, "category": "Best Actor - Telugu", "movie": "Pokiri" },
+      { "year": 2003, "category": "Best Actor - Telugu", "movie": "Okkadu" }
+    ],
+    "national_film_awards": [
+      { "year": 2019, "category": "Best Popular Film Providing Wholesome Entertainment", "movie": "Maharshi" }
+    ]
+  },
+  "top_grossing_movies": [
+    { "movie": "Sarileru Neekevvaru", "year": 2020, "worldwide_gross": "₹260+ Crores", "status": "Blockbuster" },
+    { "movie": "Sarkaru Vaari Paata", "year": 2022, "worldwide_gross": "₹230+ Crores", "status": "Super Hit" },
+    { "movie": "Srimanthudu", "year": 2015, "worldwide_gross": "₹200+ Crores", "status": "Blockbuster" },
+    { "movie": "Maharshi", "year": 2019, "worldwide_gross": "₹175+ Crores", "status": "Blockbuster" },
+    { "movie": "Bharat Ane Nenu", "year": 2018, "worldwide_gross": "₹160+ Crores", "status": "Super Hit" },
+    { "movie": "Guntur Kaaram", "year": 2024, "worldwide_gross": "₹140+ Crores", "status": "Commercial Hit" },
+    { "movie": "Pokiri", "year": 2006, "worldwide_gross": "₹66+ Crores", "status": "All-Time Industry Hit" }
+  ],
+  "upcoming_project": {
+    "title": "Varanasi (SSMB29)",
+    "director": "S.S. Rajamouli",
+    "projected_release_year": 2027,
+    "estimated_budget": "₹1,300-1,400 Crores",
+    "format": "IMAX"
+  },
   "timeline": [
     {
       "year": "1975",
@@ -379,28 +418,66 @@
   ],
   "gallery": [
     {
-      "url": "https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=1200&q=80",
-      "caption": "The theatre as temple",
-      "era": "cinema",
-      "type": "atmosphere"
+      "url": "./assets/images/1.jpeg",
+      "caption": "A fan frame that started the whole tribute",
+      "era": "Chapter 01",
+      "type": "Hero Memory"
     },
     {
-      "url": "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=1200&q=80",
-      "caption": "A frame waiting for a star",
-      "era": "memory",
-      "type": "portrait"
+      "url": "./assets/images/2.jpeg",
+      "caption": "The calm before the roar",
+      "era": "Chapter 01",
+      "type": "Hero Memory"
     },
     {
-      "url": "https://images.unsplash.com/photo-1524712245354-2c4e5e7121c0?auto=format&fit=crop&w=1200&q=80",
-      "caption": "The projector remembers",
-      "era": "memory",
-      "type": "texture"
+      "url": "./assets/roadmap/deadend.png",
+      "caption": "The future wall at the end of the road",
+      "era": "Chapter 03",
+      "type": "Road"
+    },
+    {
+      "url": "./assets/roadmap/mbf.png",
+      "caption": "Legacy is not only applause",
+      "era": "Beyond Cinema",
+      "type": "Purpose"
+    },
+    {
+      "url": "./assets/hex/01.png",
+      "caption": "One memory from the fan sphere",
+      "era": "Chapter 02",
+      "type": "Hex Memory"
+    },
+    {
+      "url": "./assets/hex/16.png",
+      "caption": "A theatre emotion frozen inside a tile",
+      "era": "Chapter 02",
+      "type": "Hex Memory"
+    },
+    {
+      "url": "./assets/hex/29.png",
+      "caption": "Varanasi anticipation begins here",
+      "era": "Future",
+      "type": "SSMB29"
     }
   ],
   "closing": {
     "wish_title": "Happy Birthday, Superstar",
-    "wish_subtitle": "For the calm. For the class. For the memories.",
-    "wish_body": "From a child artist who grew inside cinema to a star whose stillness can fill a theatre, this is my birthday wish written in frames, gold, and gratitude.",
-    "signature": "From your fans, forever"
+    "wish_subtitle": "Nuvvu nee classuu, nee swang vere level anthe..",
+    "wish_body": "I can't put into words how much I adore you, So I made this tribute to show it.",
+    "signature": "Jai Babu, always"
+  },
+  "developer": {
+    "chapter": "Chapter 07",
+    "title": "Built By A Fan",
+    "name": "Surya Teja",
+    "role": "Developer, designer, and biggest Mahesh Babu fan behind this tribute",
+    "image": "./assets/roadmap/surya.png",
+    "note": "This website is not an archive. It is my fan letter in motion: coded, tuned, broken, fixed, and polished until it felt worthy of the word tribute.",
+    "rsvp": "Reach out to me for projects like this for your business, brand, or events.",
+    "links": [
+      { "label": "Instagram", "url": "https://www.instagram.com/surya_telling" },
+      { "label": "X", "url": "https://x.com/Surya10081" }
+    ],
+    "signature": "Made with love for my BOB"
   }
 }
