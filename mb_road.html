@@ -479,7 +479,7 @@ const THEMES = {
     fogNear:   24, fogFar: 120,
     ambientInt: 0.68,
     sunInt:    0.62,
-    roadColor: 0x30292a,
+    roadColor: 0x0d0c0c,
     grassColor:0x2b171c,
     treeTrunk: 0x5a241c,
     treeTop:   0x3b1820,
@@ -495,7 +495,7 @@ const THEMES = {
     fogNear:   18, fogFar: 92,
     ambientInt: 0.28,
     sunInt:    0.18,
-    roadColor: 0x211d20,
+    roadColor: 0x080708,
     grassColor:0x1d1218,
     treeTrunk: 0x3a1818,
     treeTop:   0x25121a,
@@ -1292,9 +1292,35 @@ scene.add(deadEndGroup);
 const deadEndCenter = new THREE.Vector3(0, 2.8, -210);
 let deadEndAngle = 0;
 const DEAD_END_WALL_RATIO = 1.43;
+const deadEndMedia = {
+  video: null,
+  videoTexture: null,
+  fallbackTexture: null,
+  failed: false
+};
 
 function applyDeadEndWallMedia(material) {
+  if (deadEndMedia.videoTexture) {
+    material.map = deadEndMedia.videoTexture;
+    material.color.set(0xffffff);
+    material.needsUpdate = true;
+    deadEndMedia.video?.play().catch(() => {});
+    return;
+  }
+
+  if (deadEndMedia.fallbackTexture) {
+    material.map = deadEndMedia.fallbackTexture;
+    material.color.set(0xffffff);
+    material.needsUpdate = true;
+    return;
+  }
+
+  if (deadEndMedia.video) {
+    return;
+  }
+
   const video = document.createElement('video');
+  deadEndMedia.video = video;
   video.src = DEAD_END_VIDEO;
   video.muted = true;
   video.loop = true;
@@ -1309,6 +1335,7 @@ function applyDeadEndWallMedia(material) {
     texture.encoding = THREE.sRGBEncoding;
     texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
+    deadEndMedia.videoTexture = texture;
     material.map = texture;
     material.color.set(0xffffff);
     material.needsUpdate = true;
@@ -1316,6 +1343,7 @@ function applyDeadEndWallMedia(material) {
   }, { once: true });
 
   video.addEventListener('error', () => {
+    deadEndMedia.failed = true;
     console.warn('Dead-end video failed to load. Falling back to deadend.png:', DEAD_END_VIDEO);
     new THREE.TextureLoader().load(
       DEAD_END_IMAGE,
@@ -1323,6 +1351,7 @@ function applyDeadEndWallMedia(material) {
         texture.encoding = THREE.sRGBEncoding;
         texture.minFilter = THREE.LinearFilter;
         texture.magFilter = THREE.LinearFilter;
+        deadEndMedia.fallbackTexture = texture;
         material.map = texture;
         material.color.set(0xffffff);
         material.needsUpdate = true;
@@ -1595,10 +1624,9 @@ function toggleTheme() {
   /* Background */
   lerpColor(scene.background, T.skyTop, dur);
 
-  /* Rebuild signs and dead end with new theme colors */
+  /* Rebuild theme-colored scenery. Keep the dead-end video wall alive so playback never resets. */
   setTimeout(() => {
     buildSigns();
-    buildDeadEnd();
     scene.remove(treeGroup);
     treeGroup.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
     treeGroup = buildTrees();
