@@ -102,25 +102,6 @@ function renderHero(data) {
   `;
 }
 
-function renderHexSphereChapter(chapter) {
-  return `
-    <section class="section hex-chapter-section" data-hex-chapter>
-      <div class="hex-chapter-copy">
-        <div class="kicker">${chapter.kicker}</div>
-        <h2 class="hex-chapter-title">${chapter.title}</h2>
-        <p>${chapter.quote}</p>
-      </div>
-      <div class="hex-chapter-stage">
-        <iframe
-          src="./hexsphere.html"
-          title="Interactive Mahesh Babu fan memory sphere"
-          loading="lazy"
-          data-hex-frame
-        ></iframe>
-      </div>
-    </section>
-  `;
-}
 
 function renderRoadMapSection() {
   return `
@@ -240,6 +221,26 @@ function renderGalleryChapter(gallery) {
             </figcaption>
           </figure>
         `).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderHexSphereChapter(chapter) {
+  return `
+    <section class="section hex-chapter-section" data-hex-chapter>
+      <div class="hex-chapter-copy">
+        <div class="kicker">${chapter.kicker}</div>
+        <h2 class="hex-chapter-title">${chapter.title}</h2>
+        <p>${chapter.quote}</p>
+      </div>
+      <div class="hex-chapter-stage">
+        <iframe
+          src="./hexsphere.html"
+          title="Interactive Mahesh Babu fan memory sphere"
+          loading="lazy"
+          data-hex-frame
+        ></iframe>
       </div>
     </section>
   `;

@@ -468,10 +468,10 @@ document.getElementById('road-module').style.height = MODULE_SCROLL_HEIGHT + 'px
 /* ═══════════════════════════════════════════════════════════════
    THEME STATE
 ═══════════════════════════════════════════════════════════════ */
-let isNight = false;
+let isNight = true;
 
 const THEMES = {
-  day: {
+  night: {
     skyTop:    new THREE.Color(0x221724),
     skyMid:    new THREE.Color(0x5a2b20),
     skyHor:    new THREE.Color(0xd1864a),
@@ -556,18 +556,18 @@ const milestoneT = MILESTONES.map((_, i) => {
 /* ═══════════════════════════════════════════════════════════════
    SKY & FOG
 ═══════════════════════════════════════════════════════════════ */
-scene.background = THEMES.day.skyTop.clone();
-scene.fog = new THREE.Fog(THEMES.day.fogColor, THEMES.day.fogNear, THEMES.day.fogFar);
+scene.background = THEMES.night.skyTop.clone();
+scene.fog = new THREE.Fog(THEMES.night.fogColor, THEMES.night.fogNear, THEMES.night.fogFar);
 
 /* Sky dome */
 const skyGeo = new THREE.SphereGeometry(240, 32, 16);
 skyGeo.scale(-1, 1, -1);
 const skyMat = new THREE.ShaderMaterial({
   uniforms: {
-    uTopColor: { value: THEMES.day.skyTop.clone() },
-    uMidColor: { value: THEMES.day.skyMid.clone() },
-    uHorColor: { value: THEMES.day.skyHor.clone() },
-    uMix:      { value: 0.0 }, // 0=day, 1=night
+    uTopColor: { value: THEMES.night.skyTop.clone() },
+    uMidColor: { value: THEMES.night.skyMid.clone() },
+    uHorColor: { value: THEMES.night.skyHor.clone() },
+    uMix:      { value: 0.0 }, // 0=night, 1=night
   },
   vertexShader: `
     varying vec3 vPos;
@@ -805,10 +805,10 @@ function launchShootingStar(star) {
 /* ═══════════════════════════════════════════════════════════════
    LIGHTING
 ═══════════════════════════════════════════════════════════════ */
-const ambientLight = new THREE.AmbientLight(0xffffff, THEMES.day.ambientInt);
+const ambientLight = new THREE.AmbientLight(0xffffff, THEMES.night.ambientInt);
 scene.add(ambientLight);
 
-const sunLight = new THREE.DirectionalLight(0xffc487, THEMES.day.sunInt);
+const sunLight = new THREE.DirectionalLight(0xffc487, THEMES.night.sunInt);
 sunLight.position.set(80, 120, -60);
 sunLight.castShadow = true;
 sunLight.shadow.mapSize.set(1024, 1024);
@@ -994,7 +994,7 @@ function updateSearchlights(elapsed, scrollProg) {
 /* ═══════════════════════════════════════════════════════════════
    GROUND PLANE — covers full road extent z=0 to z=-660, plus margins
 ═══════════════════════════════════════════════════════════════ */
-const groundMat = new THREE.MeshLambertMaterial({ color: THEMES.day.grassColor });
+const groundMat = new THREE.MeshLambertMaterial({ color: THEMES.night.grassColor });
 
 // Main ground: covers the entire road path + wide side margins
 const groundGeo = new THREE.PlaneGeometry(320, 900, 1, 1);
@@ -1053,7 +1053,7 @@ function buildRoad() {
   geo.setIndex(indices);
   geo.computeVertexNormals();
 
-  const mat  = new THREE.MeshLambertMaterial({ color: THEMES.day.roadColor });
+  const mat  = new THREE.MeshLambertMaterial({ color: THEMES.night.roadColor });
   const mesh = new THREE.Mesh(geo, mat);
   mesh.receiveShadow = true;
   scene.add(mesh);
@@ -1234,7 +1234,7 @@ function buildSigns() {
   }
   signObjects.length = 0;
 
-  const T = THEMES[isNight ? 'night' : 'day'];
+  const T = THEMES[isNight ? 'night' : 'night'];
 
   MILESTONES.forEach((ms, i) => {
     const t     = milestoneT[i];
@@ -1375,7 +1375,7 @@ function buildDeadEnd() {
     deadEndGroup.remove(c);
   }
 
-  const T   = THEMES[isNight ? 'night' : 'day'];
+  const T   = THEMES[isNight ? 'night' : 'night'];
   const tEnd = 0.94;
   const pos  = roadSpline.getPoint(tEnd);
   const tN   = roadSpline.getPoint(Math.min(tEnd + 0.001, 1));
@@ -1407,7 +1407,7 @@ buildDeadEnd();
 function buildTrees() {
   const treeGroup = new THREE.Group();
   scene.add(treeGroup);
-  const T = THEMES[isNight ? 'night' : 'day'];
+  const T = THEMES[isNight ? 'night' : 'night'];
   const roadPts = roadSpline.getPoints(80);
 
   for (let i = 2; i < roadPts.length - 4; i += 3) {
@@ -1592,7 +1592,7 @@ function toggleTheme() {
   isNight = !isNight;
   document.getElementById('theme-label').textContent = isNight ? 'EMBER MODE' : 'BLOOD MODE';
 
-  const T   = THEMES[isNight ? 'night' : 'day'];
+  const T   = THEMES[isNight ? 'night' : 'night'];
   const dur = 1200; // ms
 
   /* Sky */
