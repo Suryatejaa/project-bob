@@ -92,7 +92,7 @@
     font-size: 13px;
     letter-spacing: 0.04em;
     line-height: 1.7;
-    min-height: 68px;
+    min-height: 58px;
   }
   .hud-cursor {
     animation: hudBlink 0.7s steps(1) infinite;
@@ -100,11 +100,11 @@
   }
   @keyframes hudBlink { 50% { opacity: 0; } }
   @media (max-width: 680px) {
-    #ui { bottom: 16px; width: calc(100vw - 28px); justify-content: center; }
+    #ui { bottom: 10px; width: calc(70vw - 24px); justify-content: center; }
     .btn { flex: 1; max-width: 128px; min-height: 44px; padding-inline: 8px; }
     #info { top: 16px; font-size: 10px; }
     #hexHud {
-      bottom: 74px;
+      bottom: 44px;
       left: 14px;
       right: 14px;
       top: auto;
@@ -115,7 +115,7 @@
     #hexHud.is-active {
       transform: translateY(0);
     }
-    .hud-body { min-height: 52px; }
+    .hud-body { min-height: 42px; }
   }
 </style>
 </head>
@@ -306,7 +306,7 @@ scene.add(fill);
 // ── Galaxy field ─────────────────────────────────────────────────────────────
 function makeCircleTexture(color = '255,255,255') {
   const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = 96;
+  canvas.width = canvas.height = 80;
   const ctx = canvas.getContext('2d');
   const g = ctx.createRadialGradient(48, 48, 0, 48, 48, 48);
   g.addColorStop(0, `rgba(${color},1)`);
@@ -321,8 +321,8 @@ function makeCircleTexture(color = '255,255,255') {
 
 function makeShootingStarTexture() {
   const canvas = document.createElement('canvas');
-  canvas.width = 512;
-  canvas.height = 96;
+  canvas.width = 412;
+  canvas.height = 80;
   const ctx = canvas.getContext('2d');
 
   const tail = ctx.createLinearGradient(0, 48, 512, 48);
@@ -917,5 +917,10 @@ window.addEventListener('resize', () => {
   renderer.setSize(innerWidth, innerHeight);
 });
 </script>
+    <!-- Vercel Web Analytics -->
+    <script>
+      window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    </script>
+    <script defer src="/<unique-path>/script.js"></script>
 </body>
 </html>
