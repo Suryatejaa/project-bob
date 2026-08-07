@@ -424,7 +424,9 @@
 const ROADMAP_IMAGE_BASE = './assets/roadmap/';
 const roadmapImage = (index) => `${ROADMAP_IMAGE_BASE}${String(index + 1).padStart(2, '0')}.png`;
 const DEAD_END_IMAGE = `${ROADMAP_IMAGE_BASE}deadend.png`;
-const DEAD_END_VIDEO = './assets/videos/deadend.mp4';
+const DEAD_END_VIDEO = 'https://assets.bob.calcie.fun/deadend.mp4';
+// const DEAD_END_VIDEO = './assets/videos/deadend.mp4';
+
 
 const MILESTONES = [
   { year: "1975", title: "Born Into Cinema", desc: "Mahesh Babu arrives as Krishna garu's son, carrying cinema in the bloodline before the screen even begins.", image: roadmapImage(0) },
@@ -1296,10 +1298,13 @@ const deadEndMedia = {
   video: null,
   videoTexture: null,
   fallbackTexture: null,
+  wallMaterial: null,   // store ref so async callbacks always hit live material
   failed: false
 };
 
 function applyDeadEndWallMedia(material) {
+  deadEndMedia.wallMaterial = material;   // always keep latest material ref
+
   if (deadEndMedia.videoTexture) {
     material.map = deadEndMedia.videoTexture;
     material.color.set(0xffffff);
@@ -1330,16 +1335,34 @@ function applyDeadEndWallMedia(material) {
   video.crossOrigin = 'anonymous';
   video.controls = false;
 
-  video.addEventListener('canplay', () => {
-    const texture = new THREE.VideoTexture(video);
-    texture.encoding = THREE.sRGBEncoding;
-    texture.minFilter = THREE.LinearFilter;
-    texture.magFilter = THREE.LinearFilter;
-    deadEndMedia.videoTexture = texture;
-    material.map = texture;
-    material.color.set(0xffffff);
-    material.needsUpdate = true;
+  // loadeddata = first frame decoded, safe to create texture
+  // canplay fires before first frame is ready → black screen
+  const onVideoReady = () => {
     video.play().catch(() => {});
+
+    // Small delay ensures first frame is painted into video element
+    setTimeout(() => {
+      const texture = new THREE.VideoTexture(video);
+      texture.encoding  = THREE.sRGBEncoding;
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.needsUpdate = true;
+      deadEndMedia.videoTexture = texture;
+
+      // Use stored wallMaterial — safe even if buildDeadEnd was called multiple times
+      const mat = deadEndMedia.wallMaterial;
+      if (mat) {
+        mat.map = texture;
+        mat.color.set(0xffffff);
+        mat.needsUpdate = true;
+      }
+    }, 100);
+  };
+
+  video.addEventListener('loadeddata', onVideoReady, { once: true });
+  // Fallback: if loadeddata already fired (cached video), use canplaythrough
+  video.addEventListener('canplaythrough', () => {
+    if (!deadEndMedia.videoTexture) onVideoReady();
   }, { once: true });
 
   video.addEventListener('error', () => {

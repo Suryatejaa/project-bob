@@ -4,6 +4,31 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mahesh Babu — The Journey</title>
+<script>
+  (() => {
+    const root = document.documentElement;
+    let lastWidth = window.innerWidth;
+
+    function setRoadHeight() {
+      root.style.setProperty('--road-height', `${window.innerHeight}px`);
+    }
+
+    setRoadHeight();
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth === lastWidth) return;
+      lastWidth = window.innerWidth;
+      setRoadHeight();
+    });
+
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => {
+        lastWidth = window.innerWidth;
+        setRoadHeight();
+      }, 250);
+    });
+  })();
+</script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Mono:wght@300;400&display=swap');
 
@@ -12,26 +37,28 @@
   :root {
     --gold: #EF9F27;
     --gold-deep: #BA7517;
-    --cream: #F4F0E6;
-    --black: #0A0A0A;
+    --cream: #FFF0DA;
+    --black: #1A1018;
     --blood: #b50812;
     --blood-bright: #ff2638;
-    --blood-dark: #260004;
+    --blood-dark: #3a0206;
     --blood-glow: rgba(255, 38, 56, 0.32);
-    --panel: rgba(5, 0, 4, 0.82);
+    --panel: rgba(38, 22, 26, 0.82);
+    --road-height: 100vh;
   }
 
   body {
     background:
-      radial-gradient(circle at 48% 18%, rgba(255, 38, 56, 0.08), transparent 34vw),
-      linear-gradient(180deg, #030303, #0a0103 46%, #050505);
+      radial-gradient(circle at 22% 12%, rgba(255, 210, 138, 0.18), transparent 34vw),
+      radial-gradient(circle at 82% 16%, rgba(176, 214, 255, 0.1), transparent 30vw),
+      linear-gradient(180deg, #2c1720, #4a241f 46%, #21151b);
     color: var(--cream);
     overflow-x: hidden;
     font-family: 'DM Mono', monospace;
   }
 
   body.is-embedded-road {
-    height: 100vh;
+    height: var(--road-height);
     overflow: hidden;
   }
 
@@ -46,10 +73,10 @@
     position: sticky;
     top: 0;
     width: 100%;
-    height: 100vh;
+    height: var(--road-height);
     background:
-      radial-gradient(circle at 50% 42%, rgba(255, 38, 56, 0.16), transparent 42vw),
-      #030303;
+      radial-gradient(circle at 50% 42%, rgba(255, 199, 122, 0.18), transparent 42vw),
+      #21151b;
     overflow: hidden;
   }
 
@@ -64,9 +91,9 @@
 
   #road-canvas-wrapper::before {
     background:
-      linear-gradient(90deg, rgba(255, 38, 56, 0.22), transparent 17%, transparent 83%, rgba(255, 38, 56, 0.18)),
-      radial-gradient(circle at 50% 45%, transparent 32%, rgba(0, 0, 0, 0.5) 100%);
-    opacity: 0.9;
+      linear-gradient(90deg, rgba(240, 166, 74, 0.18), transparent 17%, transparent 83%, rgba(228, 91, 68, 0.14)),
+      radial-gradient(circle at 50% 45%, transparent 36%, rgba(29, 16, 22, 0.36) 100%);
+    opacity: 0.72;
   }
 
   #road-canvas-wrapper::after {
@@ -372,8 +399,8 @@
 
     <!-- Dead End Overlay -->
     <div id="deadend-overlay">
-      <div class="deadend-text">The Impact Continues</div>
-      <div class="deadend-sub">STAR POWER · SERVICE · LEGACY</div>
+      <div class="deadend-text">Filmed for IMAX</div>
+      <div class="deadend-sub">April 7, 2027 </div>
       <div class="scroll-hint" id="scroll-hint">
         <span>SCROLL TO CONTINUE</span>
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -397,6 +424,9 @@
 const ROADMAP_IMAGE_BASE = './assets/roadmap/';
 const roadmapImage = (index) => `${ROADMAP_IMAGE_BASE}${String(index + 1).padStart(2, '0')}.png`;
 const DEAD_END_IMAGE = `${ROADMAP_IMAGE_BASE}deadend.png`;
+const DEAD_END_VIDEO = 'https://assets.bob.calcie.fun/deadend.mp4';
+// const DEAD_END_VIDEO = './assets/videos/deadend.mp4';
+
 
 const MILESTONES = [
   { year: "1975", title: "Born Into Cinema", desc: "Mahesh Babu arrives as Krishna garu's son, carrying cinema in the bloodline before the screen even begins.", image: roadmapImage(0) },
@@ -440,40 +470,40 @@ document.getElementById('road-module').style.height = MODULE_SCROLL_HEIGHT + 'px
 /* ═══════════════════════════════════════════════════════════════
    THEME STATE
 ═══════════════════════════════════════════════════════════════ */
-let isNight = false;
+let isNight = true;
 
 const THEMES = {
-  day: {
-    skyTop:    new THREE.Color(0x050103),
-    skyMid:    new THREE.Color(0x190006),
-    skyHor:    new THREE.Color(0x4a0109),
-    fogColor:  new THREE.Color(0x190006),
+  night: {
+    skyTop:    new THREE.Color(0x221724),
+    skyMid:    new THREE.Color(0x5a2b20),
+    skyHor:    new THREE.Color(0xd1864a),
+    fogColor:  new THREE.Color(0x4a241f),
     fogNear:   24, fogFar: 120,
-    ambientInt: 0.58,
-    sunInt:    0.42,
-    roadColor: 0x080607,
-    grassColor:0x090203,
-    treeTrunk: 0x260004,
-    treeTop:   0x140003,
-    signPost:  0x5f0710,
-    signBoard: 0x120003,
+    ambientInt: 0.68,
+    sunInt:    0.62,
+    roadColor: 0x0d0c0c,
+    grassColor:0x2b171c,
+    treeTrunk: 0x5a241c,
+    treeTop:   0x3b1820,
+    signPost:  0x8a3a2d,
+    signBoard: 0x2a151c,
     signText:  0xff2638,
   },
   night: {
-    skyTop:    new THREE.Color(0x000000),
-    skyMid:    new THREE.Color(0x070006),
-    skyHor:    new THREE.Color(0x1f0005),
-    fogColor:  new THREE.Color(0x080003),
+    skyTop:    new THREE.Color(0x171425),
+    skyMid:    new THREE.Color(0x2c1720),
+    skyHor:    new THREE.Color(0x6a2d24),
+    fogColor:  new THREE.Color(0x24151d),
     fogNear:   18, fogFar: 92,
-    ambientInt: 0.24,
-    sunInt:    0.08,
-    roadColor: 0x020202,
-    grassColor:0x040001,
-    treeTrunk: 0x150003,
-    treeTop:   0x090001,
-    signPost:  0x42060b,
-    signBoard: 0x060002,
-    signText:  0xf4f0e6,
+    ambientInt: 0.28,
+    sunInt:    0.18,
+    roadColor: 0x080708,
+    grassColor:0x1d1218,
+    treeTrunk: 0x3a1818,
+    treeTop:   0x25121a,
+    signPost:  0x693024,
+    signBoard: 0x1f1218,
+    signText:  0xfff0da,
   }
 };
 
@@ -528,18 +558,18 @@ const milestoneT = MILESTONES.map((_, i) => {
 /* ═══════════════════════════════════════════════════════════════
    SKY & FOG
 ═══════════════════════════════════════════════════════════════ */
-scene.background = THEMES.day.skyTop.clone();
-scene.fog = new THREE.Fog(THEMES.day.fogColor, THEMES.day.fogNear, THEMES.day.fogFar);
+scene.background = THEMES.night.skyTop.clone();
+scene.fog = new THREE.Fog(THEMES.night.fogColor, THEMES.night.fogNear, THEMES.night.fogFar);
 
 /* Sky dome */
 const skyGeo = new THREE.SphereGeometry(240, 32, 16);
 skyGeo.scale(-1, 1, -1);
 const skyMat = new THREE.ShaderMaterial({
   uniforms: {
-    uTopColor: { value: THEMES.day.skyTop.clone() },
-    uMidColor: { value: THEMES.day.skyMid.clone() },
-    uHorColor: { value: THEMES.day.skyHor.clone() },
-    uMix:      { value: 0.0 }, // 0=day, 1=night
+    uTopColor: { value: THEMES.night.skyTop.clone() },
+    uMidColor: { value: THEMES.night.skyMid.clone() },
+    uHorColor: { value: THEMES.night.skyHor.clone() },
+    uMix:      { value: 0.0 }, // 0=night, 1=night
   },
   vertexShader: `
     varying vec3 vPos;
@@ -567,7 +597,7 @@ scene.add(skyMesh);
 
 /* Sun */
 const sunGeo = new THREE.SphereGeometry(4, 16, 16);
-const sunMat = new THREE.MeshBasicMaterial({ color: 0xff2638 });
+const sunMat = new THREE.MeshBasicMaterial({ color: 0xffb75b });
 const sunMesh = new THREE.Mesh(sunGeo, sunMat);
 sunMesh.position.set(60, 80, -150);
 scene.add(sunMesh);
@@ -777,10 +807,10 @@ function launchShootingStar(star) {
 /* ═══════════════════════════════════════════════════════════════
    LIGHTING
 ═══════════════════════════════════════════════════════════════ */
-const ambientLight = new THREE.AmbientLight(0xffffff, THEMES.day.ambientInt);
+const ambientLight = new THREE.AmbientLight(0xffffff, THEMES.night.ambientInt);
 scene.add(ambientLight);
 
-const sunLight = new THREE.DirectionalLight(0xff9aa3, THEMES.day.sunInt);
+const sunLight = new THREE.DirectionalLight(0xffc487, THEMES.night.sunInt);
 sunLight.position.set(80, 120, -60);
 sunLight.castShadow = true;
 sunLight.shadow.mapSize.set(1024, 1024);
@@ -793,102 +823,204 @@ sunLight.shadow.camera.bottom = -80;
 scene.add(sunLight);
 
 /* Night streetlamp glow */
-const nightAmbient = new THREE.AmbientLight(0x3a0206, 0.0);
+const nightAmbient = new THREE.AmbientLight(0x352233, 0.0);
 scene.add(nightAmbient);
 
-const bottomSpotGroup = new THREE.Group();
-scene.add(bottomSpotGroup);
-const bottomSpots = [];
+/* ═══════════════════════════════════════════════════════════════
+   WALL UPLIGHTERS — floor-mounted spots AT BASE OF DEAD-END WALL
+   Each fixture sits on the ground touching the wall, cone points
+   straight up (or very slightly forward) to wash the wall face.
+   5 evenly-spaced fixtures across the wall width.
+   Colors: red / cyan / gold / green / red  (stadium palette)
+═══════════════════════════════════════════════════════════════ */
+const uplightGroup = new THREE.Group();
+scene.add(uplightGroup);
+const uplights = [];
+let uplightsBuilt = false;
 
-function makeSpotConeMaterial(color) {
+/* Cone material — additive so colours layer/blend on wall */
+function makeUplightBeamMat(color) {
   return new THREE.MeshBasicMaterial({
     color,
     transparent: true,
-    opacity: 0.42,
+    opacity: 0.0,
     depthWrite: false,
+    side: THREE.DoubleSide,
     blending: THREE.AdditiveBlending,
-    side: THREE.FrontSide,
   });
 }
 
-function makeFloorGlowTexture() {
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = 256;
-  const ctx = canvas.getContext('2d');
-  const g = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
-  g.addColorStop(0, 'rgba(255,255,255,0.9)');
-  g.addColorStop(0.24, 'rgba(255,120,140,0.44)');
-  g.addColorStop(0.62, 'rgba(255,38,56,0.14)');
-  g.addColorStop(1, 'rgba(255,38,56,0)');
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, 256, 256);
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.needsUpdate = true;
-  return tex;
+function buildSearchlights(wallWorldPos, wallAngle) {
+  /* clear previous */
+  while (uplightGroup.children.length) {
+    const ch = uplightGroup.children[0];
+    ch.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
+    uplightGroup.remove(ch);
+  }
+  uplights.length = 0;
+
+  /*
+   * Coordinate frame of the wall:
+   *   wallForward = direction wall faces toward camera (= wall normal pointing at player)
+   *   wallRight   = along wall width
+   *   wallUp      = (0,1,0)
+   *
+   * wallAngle = atan2(tan.x, tan.z) where tan is road forward direction.
+   * The wall is perpendicular to the road, so its normal = -road-forward direction.
+   */
+  const wallForward = new THREE.Vector3(-Math.sin(wallAngle), 0, -Math.cos(wallAngle)).normalize();
+  const wallRight   = new THREE.Vector3( Math.cos(wallAngle), 0, -Math.sin(wallAngle)).normalize();
+
+  /* wallWorldPos is the centre of the wall mesh at y=3.0 (set in buildDeadEnd).
+   * Drop to ground: base y = 0.08 (just above ground so it doesn't z-fight) */
+  const wallBase = wallWorldPos.clone().setY(0.08);
+
+  /*
+   * Single right-side diagonal fixture. It starts low in front of the wall and
+   * crosses toward the left/mid wall face.
+   */
+  const WALL_HALF_W  = 4.6;
+  const TOE_OUT      = 4.8;
+  const colors2      = [0xff2638];
+  const speeds2      = [1.10];
+  const xOffsets     = [WALL_HALF_W];
+
+  // wallForward = toward camera.  wallInto = into the wall (opposite).
+  const wallInto = wallForward.clone().negate();
+
+  xOffsets.forEach((xOff, idx) => {
+    // ── Fixture position: ground level, just in front of wall face ──
+    // x/z from wallBase + lateral offset; y forced to 0 (on road)
+    const fx = wallBase.x + wallRight.x * xOff + wallForward.x * TOE_OUT;
+    const fz = wallBase.z + wallRight.z * xOff + wallForward.z * TOE_OUT;
+    const fy = 0.05;  // just above ground — never use wallBase.y here
+
+    // ── Beam target: cross diagonally to the opposite side of the wall face ──
+    const targetOffset = -xOff * 0.56;
+    const wallH   = 6.0;
+    const targetX = wallBase.x + wallRight.x * targetOffset + wallInto.x * 0.22;
+    const targetY = wallH * 0.46;
+    const targetZ = wallBase.z + wallRight.z * targetOffset + wallInto.z * 0.22;
+
+    // ── Direction from fixture tip → wall target ──
+    const dx = targetX - fx;
+    const dy = targetY - fy;
+    const dz = targetZ - fz;
+    const len = Math.sqrt(dx*dx + dy*dy + dz*dz);
+    const beamDir = new THREE.Vector3(dx/len, dy/len, dz/len);
+
+    // ── Quaternion: rotate local +Y to beamDir ──
+    const up = new THREE.Vector3(0, 1, 0);
+    const q  = new THREE.Quaternion().setFromUnitVectors(up, beamDir);
+
+    // ── Housing ──
+    const housing = new THREE.Mesh(
+      new THREE.BoxGeometry(0.4, 0.22, 0.4),
+      new THREE.MeshLambertMaterial({ color: 0x1a0004 })
+    );
+    housing.position.set(fx, 0.11, fz);
+    uplightGroup.add(housing);
+
+    // ── Lens disc ──
+    const lensMat = new THREE.MeshBasicMaterial({
+      color: colors2[idx], transparent: true, opacity: 0.0,
+      blending: THREE.AdditiveBlending, depthWrite: false,
+    });
+    const lens = new THREE.Mesh(new THREE.CircleGeometry(0.22, 16), lensMat);
+    lens.rotation.x = -Math.PI / 2;
+    lens.position.set(fx, 0.24, fz);
+    uplightGroup.add(lens);
+
+    // ── Cone: tip at fixture, wide base lands diagonally on wall ──
+    // ConeGeometry: tip at +Y/2, base at -Y/2 by default.
+    // rotateX(PI) → tip at -Y/2, base at +Y/2 (base now UP).
+    // translate(0, len/2, 0) → tip at fixture, base lands on wall target.
+    const coneGeo = new THREE.ConeGeometry(1.45, len, 32, 1, true);
+    coneGeo.rotateX(Math.PI);
+    coneGeo.translate(0, len * 0.5, 0);
+    const coneMat = makeUplightBeamMat(colors2[idx]);
+    const cone    = new THREE.Mesh(coneGeo, coneMat);
+
+    const pivot = new THREE.Group();
+    pivot.position.set(fx, fy, fz);
+    pivot.setRotationFromQuaternion(q);
+    pivot.add(cone);
+    uplightGroup.add(pivot);
+
+    // ── SpotLight aimed at wall face centre ──
+    const spot = new THREE.SpotLight(
+      new THREE.Color(colors2[idx]),
+      0,          // intensity starts 0, animated in
+      20,         // distance
+      Math.PI / 5.5,  // angle — wide enough to cover half wall
+      0.35,       // penumbra
+      1.0         // decay
+    );
+    spot.position.set(fx, 0.3, fz);
+    spot.target.position.set(targetX, targetY, targetZ);
+    spot.castShadow = false;
+    uplightGroup.add(spot, spot.target);
+
+    uplights.push({
+      cone, coneMat, lens, lensMat, spot,
+      phase: idx * Math.PI,
+      speed: speeds2[idx],
+    });
+  });
+
+  uplightsBuilt = true;
 }
 
-const floorGlowTexture = makeFloorGlowTexture();
+let uplightVisibility = 0;
 
-function buildBottomSpotlights(targetPos = new THREE.Vector3(0, 2.8, -210), wallAngle = 0) {
-  while (bottomSpotGroup.children.length) {
-    const child = bottomSpotGroup.children[0];
-    child.traverse(o => {
-      if (o.geometry) o.geometry.dispose();
-      if (o.material) o.material.dispose();
-    });
-    bottomSpotGroup.remove(child);
-  }
-  bottomSpots.length = 0;
+function updateSearchlights(elapsed, scrollProg) {
+  if (!uplightsBuilt) return;
 
-  const colors = [0xff2638, 0x5ee8ff, 0x87ffbd];
-  const offsets = [-4.4, 0, 4.4];
-  const forward = new THREE.Vector3(Math.sin(wallAngle), 0, Math.cos(wallAngle));
-  const right = new THREE.Vector3(Math.cos(wallAngle), 0, -Math.sin(wallAngle));
+  /* Fade in as player approaches dead end (85%→97% scroll) */
+  const targetVis = scrollProg > 0.85
+    ? Math.min(1.0, (scrollProg - 0.85) / 0.12)
+    : 0.0;
+  uplightVisibility += (targetVis - uplightVisibility) * 0.05;
 
-  offsets.forEach((offset, index) => {
-    const base = targetPos.clone()
-      .addScaledVector(right, offset)
-      .addScaledVector(forward, 5.2)
-      .setY(0.18);
-    const target = targetPos.clone()
-      .addScaledVector(right, offset * 0.22)
-      .setY(3.2);
+  uplights.forEach((ul, i) => {
+    /* Each light pulses independently — slower breathe, not strobe */
+    const pulse = 0.65 + Math.sin(elapsed * ul.speed + ul.phase) * 0.35;
+    const vis   = uplightVisibility * pulse;
 
-    const spot = new THREE.SpotLight(colors[index], index === 0 ? 10.5 : 8.2, 46, Math.PI / 4.4, 0.52, 0.75);
-    spot.position.copy(base);
-    spot.target.position.copy(target);
-    spot.castShadow = false;
-    bottomSpotGroup.add(spot, spot.target);
-
-    const glow = new THREE.Mesh(
-      new THREE.PlaneGeometry(4.8, 4.8),
-      new THREE.MeshBasicMaterial({
-        map: floorGlowTexture,
-        color: colors[index],
-        transparent: true,
-        opacity: index === 0 ? 0.52 : 0.34,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-      })
-    );
-    glow.rotation.x = -Math.PI / 2;
-    glow.position.copy(base).setY(0.035);
-    bottomSpotGroup.add(glow);
-    bottomSpots.push({ spot, glow, baseIntensity: spot.intensity, baseOpacity: glow.material.opacity, phase: index * 1.7 });
+    ul.coneMat.opacity  = 0.52 * vis;
+    ul.lensMat.opacity  = 0.95 * uplightVisibility;  // lens always bright when visible
+    ul.spot.intensity   = 14 * vis;
   });
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   GROUND PLANE
+   GROUND PLANE — covers full road extent z=0 to z=-660, plus margins
 ═══════════════════════════════════════════════════════════════ */
-const groundGeo = new THREE.PlaneGeometry(300, 800, 1, 1);
-const groundMat = new THREE.MeshLambertMaterial({ color: THEMES.day.grassColor });
+const groundMat = new THREE.MeshLambertMaterial({ color: THEMES.night.grassColor });
+
+// Main ground: covers the entire road path + wide side margins
+const groundGeo = new THREE.PlaneGeometry(320, 900, 1, 1);
 const ground    = new THREE.Mesh(groundGeo, groundMat);
 ground.rotation.x = -Math.PI / 2;
-ground.position.y = 0;
-ground.position.z = -200;
+ground.position.set(0, -0.02, -330);   // centered on road extent
 ground.receiveShadow = true;
 scene.add(ground);
+
+// Forward tile: fills the z=0..+80 area behind camera start
+const groundFwdGeo = new THREE.PlaneGeometry(320, 100, 1, 1);
+const groundFwd    = new THREE.Mesh(groundFwdGeo, groundMat);
+groundFwd.rotation.x = -Math.PI / 2;
+groundFwd.position.set(0, -0.02, 40);
+groundFwd.receiveShadow = true;
+scene.add(groundFwd);
+
+// Tail tile: beyond the dead-end wall z=-660...-800
+const groundTailGeo = new THREE.PlaneGeometry(320, 200, 1, 1);
+const groundTail    = new THREE.Mesh(groundTailGeo, groundMat);
+groundTail.rotation.x = -Math.PI / 2;
+groundTail.position.set(0, -0.02, -750);
+groundTail.receiveShadow = true;
+scene.add(groundTail);
 
 /* ═══════════════════════════════════════════════════════════════
    ROAD MESH (ribbon along spline)
@@ -897,8 +1029,6 @@ function buildRoad() {
   const RW   = CFG.roadWidth / 2;
   const pts  = roadSpline.getPoints(600);
   const verts = [], indices = [], uvs = [];
-  const bedVerts = [], bedIndices = [], bedUvs = [];
-  const bedRW = RW + 1.65;
 
   for (let i = 0; i < pts.length; i++) {
     const t  = i / (pts.length - 1);
@@ -908,33 +1038,16 @@ function buildRoad() {
       : pts[i].clone().sub(pts[i-1]).normalize();
     const right = new THREE.Vector3().crossVectors(tangent, new THREE.Vector3(0,1,0)).normalize();
 
-    bedVerts.push(pt.x - right.x * bedRW, 0.001, pt.z - right.z * bedRW);
-    bedVerts.push(pt.x + right.x * bedRW, 0.001, pt.z + right.z * bedRW);
-    bedUvs.push(0, t * 40);
-    bedUvs.push(1, t * 40);
-
-    verts.push(pt.x - right.x * RW, 0.012, pt.z - right.z * RW);
-    verts.push(pt.x + right.x * RW, 0.012, pt.z + right.z * RW);
+    verts.push(pt.x - right.x * RW, 0.01, pt.z - right.z * RW);
+    verts.push(pt.x + right.x * RW, 0.01, pt.z + right.z * RW);
     uvs.push(0, t * 40);
     uvs.push(1, t * 40);
 
     if (i < pts.length - 1) {
       const b = i * 2;
       indices.push(b, b+1, b+2, b+1, b+3, b+2);
-      bedIndices.push(b, b+1, b+2, b+1, b+3, b+2);
     }
   }
-
-  const bedGeo = new THREE.BufferGeometry();
-  bedGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(bedVerts), 3));
-  bedGeo.setAttribute('uv',       new THREE.BufferAttribute(new Float32Array(bedUvs), 2));
-  bedGeo.setIndex(bedIndices);
-  bedGeo.computeVertexNormals();
-
-  const bedMat = new THREE.MeshLambertMaterial({ color: 0x170006 });
-  const bedMesh = new THREE.Mesh(bedGeo, bedMat);
-  bedMesh.receiveShadow = true;
-  scene.add(bedMesh);
 
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(verts), 3));
@@ -942,7 +1055,7 @@ function buildRoad() {
   geo.setIndex(indices);
   geo.computeVertexNormals();
 
-  const mat  = new THREE.MeshLambertMaterial({ color: THEMES.day.roadColor });
+  const mat  = new THREE.MeshLambertMaterial({ color: THEMES.night.roadColor });
   const mesh = new THREE.Mesh(geo, mat);
   mesh.receiveShadow = true;
   scene.add(mesh);
@@ -950,7 +1063,7 @@ function buildRoad() {
   /* Dashed center line */
   const dashPts = [];
   for (let i = 0; i < pts.length; i++) {
-    if (Math.floor(i * 0.15) % 2 === 0) dashPts.push(pts[i].clone().setY(0.022));
+    if (Math.floor(i * 0.15) % 2 === 0) dashPts.push(pts[i].clone().setY(0.03));
   }
   if (dashPts.length > 1) {
     const dGeo = new THREE.BufferGeometry().setFromPoints(dashPts);
@@ -965,7 +1078,7 @@ function buildRoad() {
         ? pts[i+1].clone().sub(pt).normalize()
         : pts[i].clone().sub(pts[i-1]).normalize();
       const right = new THREE.Vector3().crossVectors(tangent, new THREE.Vector3(0,1,0)).normalize();
-      return pt.clone().add(right.multiplyScalar(side * RW * 0.98)).setY(0.02);
+      return pt.clone().add(right.multiplyScalar(side * RW * 0.98)).setY(0.025);
     });
     const eGeo = new THREE.BufferGeometry().setFromPoints(edgePts);
     const eMat = new THREE.LineBasicMaterial({ color: 0x8b000d, transparent: true, opacity: 0.78, linewidth: 1 });
@@ -1123,7 +1236,7 @@ function buildSigns() {
   }
   signObjects.length = 0;
 
-  const T = THEMES[isNight ? 'night' : 'day'];
+  const T = THEMES[isNight ? 'night' : 'night'];
 
   MILESTONES.forEach((ms, i) => {
     const t     = milestoneT[i];
@@ -1180,6 +1293,82 @@ const deadEndGroup = new THREE.Group();
 scene.add(deadEndGroup);
 const deadEndCenter = new THREE.Vector3(0, 2.8, -210);
 let deadEndAngle = 0;
+const DEAD_END_WALL_RATIO = 1.43;
+const deadEndMedia = {
+  video: null,
+  videoTexture: null,
+  fallbackTexture: null,
+  failed: false
+};
+
+function applyDeadEndWallMedia(material) {
+  if (deadEndMedia.videoTexture) {
+    material.map = deadEndMedia.videoTexture;
+    material.color.set(0xffffff);
+    material.needsUpdate = true;
+    deadEndMedia.video?.play().catch(() => {});
+    return;
+  }
+
+  if (deadEndMedia.fallbackTexture) {
+    material.map = deadEndMedia.fallbackTexture;
+    material.color.set(0xffffff);
+    material.needsUpdate = true;
+    return;
+  }
+
+  if (deadEndMedia.video) {
+    return;
+  }
+
+  const video = document.createElement('video');
+  deadEndMedia.video = video;
+  video.src = DEAD_END_VIDEO;
+  video.muted = true;
+  video.loop = true;
+  video.playsInline = true;
+  video.autoplay = true;
+  video.preload = 'auto';
+  video.crossOrigin = 'anonymous';
+  video.controls = false;
+
+  video.addEventListener('canplay', () => {
+    const texture = new THREE.VideoTexture(video);
+    texture.encoding = THREE.sRGBEncoding;
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    deadEndMedia.videoTexture = texture;
+    material.map = texture;
+    material.color.set(0xffffff);
+    material.needsUpdate = true;
+    video.play().catch(() => {});
+  }, { once: true });
+
+  video.addEventListener('error', () => {
+    deadEndMedia.failed = true;
+    console.warn('Dead-end video failed to load. Falling back to deadend.png:', DEAD_END_VIDEO);
+    new THREE.TextureLoader().load(
+      DEAD_END_IMAGE,
+      texture => {
+        texture.encoding = THREE.sRGBEncoding;
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        deadEndMedia.fallbackTexture = texture;
+        material.map = texture;
+        material.color.set(0xffffff);
+        material.needsUpdate = true;
+      },
+      undefined,
+      () => {
+        material.map = null;
+        material.color.set(isNight ? 0x080003 : 0x160003);
+        material.needsUpdate = true;
+      }
+    );
+  }, { once: true });
+
+  video.load();
+}
 
 function buildDeadEnd() {
   while (deadEndGroup.children.length) {
@@ -1188,7 +1377,7 @@ function buildDeadEnd() {
     deadEndGroup.remove(c);
   }
 
-  const T   = THEMES[isNight ? 'night' : 'day'];
+  const T   = THEMES[isNight ? 'night' : 'night'];
   const tEnd = 0.94;
   const pos  = roadSpline.getPoint(tEnd);
   const tN   = roadSpline.getPoint(Math.min(tEnd + 0.001, 1));
@@ -1198,43 +1387,19 @@ function buildDeadEnd() {
   deadEndCenter.copy(wallCenter).setY(2.8);
   deadEndAngle = angle;
 
-  /* Wall */
-  const wallGeo = new THREE.BoxGeometry(10, 5, 0.4);
-  const wallMat = new THREE.MeshLambertMaterial({ color: isNight ? 0x080003 : 0x160003 });
-  new THREE.TextureLoader().load(
-    DEAD_END_IMAGE,
-    texture => {
-      texture.encoding = THREE.sRGBEncoding;
-      texture.minFilter = THREE.LinearFilter;
-      texture.magFilter = THREE.LinearFilter;
-      wallMat.map = texture;
-      wallMat.color.set(0xffffff);
-      wallMat.needsUpdate = true;
-    },
-    undefined,
-    () => {
-      wallMat.map = null;
-      wallMat.color.set(isNight ? 0x080003 : 0x160003);
-      wallMat.needsUpdate = true;
-    }
-  );
+  /* True IMAX 1.43:1 video wall */
+  const wallH = 6.2;
+  const wallW = wallH * DEAD_END_WALL_RATIO;
+  const wallGeo = new THREE.BoxGeometry(wallW, wallH, 0.32);
+  const wallMat = new THREE.MeshBasicMaterial({ color: isNight ? 0x080003 : 0x160003 });
+  applyDeadEndWallMedia(wallMat);
   const wall    = new THREE.Mesh(wallGeo, wallMat);
   wall.castShadow = true;
   wall.receiveShadow = true;
-  wall.position.set(wallCenter.x, 2.5, wallCenter.z);
+  wall.position.set(wallCenter.x, wallH / 2, wallCenter.z);
   wall.rotation.y = angle;
 
-  /* Barricade stripes */
-  for (let b = -2; b <= 2; b += 2) {
-    const bGeo  = new THREE.BoxGeometry(0.25, 1.5, 0.3);
-    const bMat  = new THREE.MeshLambertMaterial({ color: 0xff2638 });
-    const bMesh = new THREE.Mesh(bGeo, bMat);
-    bMesh.position.set(b, 0.75, 0.35);
-    wall.add(bMesh);
-  }
-
   deadEndGroup.add(wall);
-  buildBottomSpotlights(wall.position, angle);
 }
 buildDeadEnd();
 
@@ -1244,7 +1409,7 @@ buildDeadEnd();
 function buildTrees() {
   const treeGroup = new THREE.Group();
   scene.add(treeGroup);
-  const T = THEMES[isNight ? 'night' : 'day'];
+  const T = THEMES[isNight ? 'night' : 'night'];
   const roadPts = roadSpline.getPoints(80);
 
   for (let i = 2; i < roadPts.length - 4; i += 3) {
@@ -1285,6 +1450,7 @@ let treeGroup = buildTrees();
 let scrollProgress = 0;      // 0→1
 let deadEndReached = false;
 let lastScrollY    = 0;
+let scrollHintTimer = null;
 
 const tooltip    = document.getElementById('tooltip');
 const tYear      = document.getElementById('tooltip-year');
@@ -1307,14 +1473,16 @@ function updateRoadProgress(progress) {
   const camPos = roadSpline.getPoint(camT);
   const lookT  = Math.min(camT + 0.015, 1);
   const lookAt = roadSpline.getPoint(lookT);
-  if (scrollProgress > 0.91) {
-    const endBlend = Math.min(1, (scrollProgress - 0.91) / 0.08);
-    lookAt.x += (deadEndCenter.x - lookAt.x) * endBlend * 0.72;
-    lookAt.z += (deadEndCenter.z - lookAt.z) * endBlend * 0.72;
+  if (scrollProgress > 0.87) {
+    const endBlend = Math.min(1, (scrollProgress - 0.87) / 0.09);
+    const ease = 1 - Math.pow(1 - endBlend, 3);
+    lookAt.x += (deadEndCenter.x - lookAt.x) * ease;
+    lookAt.y  = CFG.cameraHeight * 0.5 + (deadEndCenter.y - CFG.cameraHeight * 0.5) * ease;
+    lookAt.z += (deadEndCenter.z - lookAt.z) * ease;
   }
 
   camera.position.set(camPos.x, CFG.cameraHeight, camPos.z);
-  camera.lookAt(lookAt.x, CFG.cameraHeight * 0.5, lookAt.z);
+  camera.lookAt(lookAt.x, lookAt.y !== undefined ? lookAt.y : CFG.cameraHeight * 0.5, lookAt.z);
 
   /* Sky follows camera */
   skyMesh.position.copy(camera.position);
@@ -1377,14 +1545,22 @@ function updateRoadProgress(progress) {
   }
 
   /* ── Dead end ── */
-  if (scrollProgress > 0.975 && !deadEndReached) {
+  const finalMilestoneT = milestoneT[milestoneT.length - 1];
+  const finalMilestoneCleared = camT > finalMilestoneT + 0.006;
+  const creditsReady = scrollProgress > 0.975 && finalMilestoneCleared;
+  const shouldHideCredits = scrollProgress < 0.955 || camT < finalMilestoneT - 0.004;
+
+  if (creditsReady && !deadEndReached) {
     deadEndReached = true;
     tooltip.classList.remove('visible');
     activeTooltipSign = -1;
     deadOverlay.classList.add('visible');
-    setTimeout(() => scrollHint.classList.add('show'), 1600);
-  } else if (scrollProgress < 0.94 && deadEndReached) {
+    clearTimeout(scrollHintTimer);
+    scrollHintTimer = setTimeout(() => scrollHint.classList.add('show'), 1600);
+  } else if (shouldHideCredits && deadEndReached) {
     deadEndReached = false;
+    clearTimeout(scrollHintTimer);
+    scrollHintTimer = null;
     deadOverlay.classList.remove('visible');
     scrollHint.classList.remove('show');
   }
@@ -1418,7 +1594,7 @@ function toggleTheme() {
   isNight = !isNight;
   document.getElementById('theme-label').textContent = isNight ? 'EMBER MODE' : 'BLOOD MODE';
 
-  const T   = THEMES[isNight ? 'night' : 'day'];
+  const T   = THEMES[isNight ? 'night' : 'night'];
   const dur = 1200; // ms
 
   /* Sky */
@@ -1450,10 +1626,9 @@ function toggleTheme() {
   /* Background */
   lerpColor(scene.background, T.skyTop, dur);
 
-  /* Rebuild signs and dead end with new theme colors */
+  /* Rebuild theme-colored scenery. Keep the dead-end video wall alive so playback never resets. */
   setTimeout(() => {
     buildSigns();
-    buildDeadEnd();
     scene.remove(treeGroup);
     treeGroup.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
     treeGroup = buildTrees();
@@ -1550,12 +1725,6 @@ function animate() {
       star.mat.opacity = 0;
       star.sprite.visible = false;
     }
-  });
-
-  bottomSpots.forEach(item => {
-    const pulse = 0.82 + Math.sin(elapsed * 1.6 + item.phase) * 0.18;
-    item.glow.material.opacity = item.baseOpacity * pulse;
-    item.spot.intensity = item.baseIntensity * (0.85 + pulse * 0.28);
   });
 
   /* Sign boards subtle breathe (scale y) */
